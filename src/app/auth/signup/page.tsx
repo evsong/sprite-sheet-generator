@@ -92,11 +92,6 @@ export default function SignUpPage() {
             padding: "40px",
           }}
         >
-          <div
-            className="absolute top-0 left-[40px] right-[40px]"
-            style={{ height: "1px", background: "var(--cyan)", opacity: 0.4 }}
-          />
-
           <h1
             style={{
               fontFamily: "var(--font-display)",
