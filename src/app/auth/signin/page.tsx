@@ -80,7 +80,7 @@ export default function SignInPage() {
       }} />
 
       <div className="relative w-full max-w-[420px] mx-4">
-        <Link href="/" className="flex items-center justify-center gap-2.5 mb-12">
+        <Link href="/" className="flex items-center justify-center gap-2.5 mb-16">
           <svg viewBox="0 0 20 20" fill="none" width="24" height="24">
             <rect width="20" height="20" fill="#fff" />
             <rect x="4" y="4" width="5" height="5" fill="#000" />
