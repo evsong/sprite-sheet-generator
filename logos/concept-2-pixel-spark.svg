@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <!-- Concept B: Pixel Spark — Hammer strike with pixel debris -->
+  <g transform="translate(12,8)">
+    <!-- Hammer head — blocky, heavy, dark purple -->
+    <rect x="18" y="16" width="32" height="18" rx="2" fill="#7C3AED" transform="rotate(-35,34,25)"/>
+    <rect x="22" y="20" width="24" height="10" rx="1" fill="#6D28D9" transform="rotate(-35,34,25)"/>
+    <!-- Handle -->
+    <rect x="42" y="30" width="6" height="36" rx="2" fill="#4338CA" transform="rotate(-35,45,48)"/>
+    <!-- Impact surface — thin line -->
+    <line x1="10" y1="72" x2="80" y2="72" stroke="#1E1B4B" stroke-width="2" stroke-linecap="round"/>
+    <!-- Pixel sparks flying from impact point (x~38, y~72) -->
+    <rect x="44" y="52" width="6" height="6" rx="1" fill="#EF4444" transform="rotate(12,47,55)"/>
+    <rect x="56" y="44" width="5" height="5" rx="1" fill="#F59E0B"/>
+    <rect x="64" y="54" width="4" height="4" rx="0.5" fill="#FBBF24" opacity="0.8"/>
+    <rect x="52" y="36" width="3" height="3" rx="0.5" fill="#FCD34D" opacity="0.6"/>
+    <rect x="70" y="48" width="3" height="3" rx="0.5" fill="#EF4444" opacity="0.5"/>
+    <rect x="34" y="48" width="4" height="4" rx="0.5" fill="#F59E0B" opacity="0.7"/>
+    <!-- Impact flash -->
+    <circle cx="42" cy="70" r="6" fill="#F59E0B" opacity="0.12"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="130" y="55" font-family="system-ui,-apple-system,sans-serif" font-size="38" font-weight="800" letter-spacing="-1.5" fill="#E8E4F0">Sprite</text>
+  <text x="248" y="55" font-family="system-ui,-apple-system,sans-serif" font-size="38" font-weight="800" letter-spacing="-1.5" fill="#A78BFA">Forge</text>
+  <text x="131" y="78" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="500" letter-spacing="2.5" fill="#5A5478">AI-POWERED SPRITE SHEETS</text>
+</svg>

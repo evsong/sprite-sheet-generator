@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpriteForge — AI-Powered Sprite Sheet Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Russo+One&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  /* Design System: SpriteForge MASTER.md */
+  --color-primary:#1E293B;--color-secondary:#334155;
+  --color-cta:#22C55E;--color-cta-hover:#4ADE80;
+  --color-bg:#0F172A;--color-bg-panel:#111827;--color-bg-surface:#1E293B;--color-bg-elevated:#334155;
+  --color-text:#F8FAFC;--color-text-dim:#94A3B8;--color-text-muted:#64748B;
+  --color-border:rgba(248,250,252,0.08);--color-border-hover:rgba(248,250,252,0.16);
+  --cyan:#22C55E;--cyan-dim:rgba(34,197,94,0.12);
+  --amber:#F59E0B;--amber-dim:rgba(245,158,11,0.12);
+  --green:#22C55E;--green-dim:rgba(34,197,94,0.12);
+  --red:#EF4444;--red-dim:rgba(239,68,68,0.1);
+  /* Spacing tokens */
+  --space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--space-2xl:48px;--space-3xl:64px;
+  /* Shadow depths */
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.2);--shadow-md:0 4px 6px rgba(0,0,0,0.25);
+  --shadow-lg:0 10px 15px rgba(0,0,0,0.25);--shadow-xl:0 20px 25px rgba(0,0,0,0.3);
+  /* Typography */
+  --font-display:'Russo One',sans-serif;
+  --font-body:'Chakra Petch',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  /* Layout */
+  --nav-h:56px;--container:1120px;
+}
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:var(--font-body);color:var(--color-text);background:var(--color-bg);line-height:1.5;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font-family:inherit}
+h1,h2,h3{font-family:var(--font-display);letter-spacing:0.02em;font-weight:400}
+::selection{background:var(--cyan);color:#000}
+/* Focus states — a11y */
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:4px}
+/* Reduced motion */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}}
+/* Subtle grid bg */
+.grid-bg{position:fixed;inset:0;z-index:-1;background-size:48px 48px;background-image:linear-gradient(to right,rgba(34,197,94,0.025) 1px,transparent 1px),linear-gradient(to bottom,rgba(34,197,94,0.025) 1px,transparent 1px)}
+/* ===== NAV ===== */
+nav{position:fixed;top:var(--space-sm);left:var(--space-sm);right:var(--space-sm);height:var(--nav-h);z-index:100;background:rgba(15,23,42,0.88);backdrop-filter:blur(12px);border:1px solid var(--color-border);border-radius:12px}
+.nav-inner{max-width:var(--container);margin:0 auto;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 var(--space-lg)}
+.nav-logo{display:flex;align-items:center;gap:var(--space-sm);font-family:var(--font-display);font-size:15px;color:#fff;cursor:pointer}
+.nav-logo svg{width:24px;height:24px}
+.nav-links{display:flex;align-items:center;gap:var(--space-lg)}
+.nav-links a{font-size:13px;font-weight:500;color:var(--color-text-muted);transition:color 200ms;cursor:pointer}
+.nav-links a:hover{color:var(--color-text)}
+/* ===== BUTTONS ===== */
+.btn{height:36px;padding:0 var(--space-md);font-size:13px;font-weight:600;letter-spacing:0.02em;border-radius:8px;display:inline-flex;align-items:center;gap:6px;transition:all 200ms;border:1px solid transparent;cursor:pointer;background:none;color:inherit}
+.btn-cta{background:var(--cyan);color:#0F172A;border-color:var(--cyan)}
+.btn-cta:hover{background:var(--color-cta-hover);box-shadow:0 0 24px rgba(34,197,94,0.25);transform:translateY(-1px)}
+.btn-ghost{border-color:var(--color-border-hover);color:var(--color-text-dim)}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--color-text)}
+.btn-amber{background:var(--amber);color:#0F172A;border-color:var(--amber)}
+.btn-amber:hover{background:#FBBF24;transform:translateY(-1px)}
+.btn-sm{height:30px;padding:0 12px;font-size:12px}
+.btn-lg{height:42px;padding:0 var(--space-lg);font-size:14px}
+/* ===== TAGS ===== */
+.tag{display:inline-flex;align-items:center;gap:var(--space-xs);font-family:var(--font-mono);font-size:11px;padding:4px 12px;border-radius:6px;letter-spacing:0.04em}
+.tag-cyan{color:var(--cyan);background:var(--cyan-dim);border:1px solid rgba(34,197,94,0.2)}
+.tag-amber{color:var(--amber);background:var(--amber-dim);border:1px solid rgba(245,158,11,0.2)}
+/* ===== LAYOUT ===== */
+.page{display:none}.page.active{display:block}
+section{padding:var(--space-3xl) var(--space-lg)}
+.container{max-width:var(--container);margin:0 auto}
+.section-header{margin-bottom:var(--space-2xl);text-align:center}
+.section-title{font-size:32px;color:#fff}
+.section-title span{color:var(--cyan)}
+.section-desc{font-family:var(--font-body);font-size:15px;font-weight:400;color:var(--color-text-dim);margin-top:var(--space-sm);max-width:540px;margin-left:auto;margin-right:auto;line-height:1.7}
+#landing{padding-top:calc(var(--nav-h) + var(--space-md))}
+/* ===== HERO ===== */
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2xl);align-items:center}
+.pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-stats{display:flex;gap:var(--space-xl);margin-top:var(--space-xl);padding-top:var(--space-lg);border-top:1px solid var(--color-border)}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat-val{font-family:var(--font-mono);font-size:22px;font-weight:500;color:var(--cyan)}
+.stat-label{font-size:11px;color:var(--color-text-muted);letter-spacing:0.04em}
+/* Hero preview card */
+.hero-preview{border:1px solid var(--color-border);border-radius:12px;overflow:hidden;background:var(--color-bg-panel);box-shadow:var(--shadow-xl)}
+.preview-header{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--color-border);background:var(--color-bg-surface)}
+.dot-r,.dot-y,.dot-g{width:8px;height:8px;border-radius:50%}
+.dot-r{background:var(--red)}.dot-y{background:var(--amber)}.dot-g{background:var(--green)}
+.preview-canvas{padding:var(--space-md)}
+.sprite-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.sg-cell{aspect-ratio:1;border:1px solid;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:transform 200ms;cursor:pointer}
+.sg-cell:hover{box-shadow:0 0 12px rgba(34,197,94,0.2)}
+.sg-wide{grid-column:span 2}
+.preview-info{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid var(--color-border)}
+/* ===== FEATURES ===== */
+.features-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-md)}
+.feature-card{background:var(--color-bg);border:1px solid var(--color-border);border-radius:12px;padding:var(--space-lg);box-shadow:var(--shadow-md);transition:all 200ms;position:relative;overflow:hidden;cursor:pointer}
+.feature-card:hover{border-color:var(--cyan);transform:translateY(-2px);box-shadow:0 8px 32px rgba(34,197,94,0.08)}
+.feature-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-md)}
+.feature-card h3{font-size:17px;margin-bottom:var(--space-sm);color:#fff}
+.feature-card p{font-family:var(--font-body);font-weight:400;font-size:13px;color:var(--color-text-dim);line-height:1.7}
+.feature-card .feature-tag{position:absolute;top:var(--space-md);right:var(--space-md)}
+/* ===== STEPS ===== */
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-lg)}
+.step-card{text-align:center;padding:var(--space-xl) var(--space-lg);background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:12px;position:relative;cursor:default;transition:border-color 200ms}
+.step-card:hover{border-color:var(--color-border-hover)}
+.step-num{font-family:var(--font-display);font-size:40px;color:var(--cyan);opacity:0.2;margin-bottom:var(--space-sm)}
+.step-card h3{font-size:16px;margin-bottom:var(--space-sm);color:#fff}
+.step-card p{font-family:var(--font-body);font-weight:400;font-size:13px;color:var(--color-text-dim);line-height:1.7}
+.step-arrow{position:absolute;right:-16px;top:50%;transform:translateY(-50%);color:var(--color-text-muted)}
+/* ===== PRICING ===== */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-md);align-items:start}
+.price-card{background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:12px;padding:var(--space-lg);transition:all 200ms}
+.price-card.featured{border-color:var(--cyan);box-shadow:0 0 48px rgba(34,197,94,0.1)}
+.price-card h3{font-size:20px;margin-bottom:var(--space-xs)}
+.price-amount{font-family:var(--font-mono);font-size:36px;font-weight:700;color:#fff;margin:var(--space-md) 0 var(--space-xs)}
+.price-amount span{font-size:14px;color:var(--color-text-muted);font-weight:400}
+.price-desc{font-size:13px;color:var(--color-text-muted);margin-bottom:var(--space-lg)}
+.price-features{list-style:none;margin-bottom:var(--space-lg)}
+.price-features li{font-family:var(--font-body);font-weight:400;font-size:13px;color:var(--color-text-dim);padding:7px 0;border-bottom:1px solid var(--color-border);display:flex;align-items:center;gap:var(--space-sm)}
+.price-features li svg{flex-shrink:0}
+.check{color:var(--cyan)}.cross{color:var(--color-text-muted);opacity:0.35}
+/* ===== FOOTER ===== */
+footer{padding:var(--space-xl) var(--space-lg);border-top:1px solid var(--color-border)}
+footer p{font-size:12px;color:var(--color-text-muted)}
+/* ===== EDITOR ===== */
+#editor-page.active{display:flex;flex-direction:column;position:fixed;inset:0;top:calc(var(--nav-h) + var(--space-md));background:var(--color-bg);overflow:hidden}
+.editor-toolbar{display:flex;align-items:center;gap:var(--space-sm);padding:6px 12px;border-bottom:1px solid var(--color-border);background:var(--color-bg-panel);flex-shrink:0}
+.toolbar-group{display:flex;align-items:center;gap:2px;padding:0 var(--space-sm);border-right:1px solid var(--color-border)}
+.toolbar-group:last-child{border-right:none;margin-left:auto}
+.tool-btn{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--color-text-dim);transition:all 150ms;cursor:pointer;background:none;border:none}
+.tool-btn:hover{background:var(--color-bg-elevated);color:var(--color-text)}
+.tool-btn.active{background:var(--cyan-dim);color:var(--cyan)}
+.editor-body{display:grid;grid-template-columns:220px 1fr 248px;flex:1;overflow:hidden}
+.panel{background:var(--color-bg-panel);border-right:1px solid var(--color-border);overflow-y:auto}
+.panel:last-child{border-right:none;border-left:1px solid var(--color-border)}
+.panel-header{font-family:var(--font-display);font-size:11px;letter-spacing:0.06em;color:var(--color-text-muted);padding:14px 14px 8px;text-transform:uppercase}
+.sprite-item{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;transition:background 150ms;border-left:2px solid transparent}
+.sprite-item:hover{background:var(--color-bg-surface)}
+.sprite-item.selected{background:var(--color-bg-surface);border-left-color:var(--cyan)}
+.sprite-thumb{width:36px;height:36px;border-radius:6px;border:1px solid var(--color-border);display:flex;align-items:center;justify-content:center;background:var(--color-bg-surface)}
+.sprite-name{font-size:12px;color:var(--color-text)}
+.sprite-size{font-family:var(--font-mono);font-size:10px;color:var(--color-text-muted)}
+.canvas-area{background:#060A12;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ruler-h{position:absolute;top:0;left:28px;right:0;height:20px;background:var(--color-bg-surface);border-bottom:1px solid var(--color-border);display:flex}
+.ruler-v{position:absolute;top:20px;left:0;bottom:0;width:28px;background:var(--color-bg-surface);border-right:1px solid var(--color-border)}
+.r-tick{width:48px;height:100%;border-right:1px solid rgba(248,250,252,0.04);display:flex;align-items:center;padding-left:3px;font-family:var(--font-mono);font-size:8px;color:var(--color-text-muted);flex-shrink:0}
+.canvas-content{width:520px;height:380px;border:1px dashed rgba(34,197,94,0.25);position:relative;background:repeating-conic-gradient(rgba(248,250,252,0.02) 0% 25%,transparent 0% 50%) 0 0/16px 16px}
+.packed-sprite{position:absolute;border:1px solid;border-radius:4px;display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;font-family:var(--font-mono);color:rgba(248,250,252,0.5);transition:all 150ms;cursor:pointer}
+.packed-sprite:hover{z-index:10;box-shadow:0 0 16px rgba(34,197,94,0.25)}
+.setting-group{padding:10px 14px;border-bottom:1px solid var(--color-border)}
+.setting-label{font-size:11px;color:var(--color-text-muted);margin-bottom:6px;font-weight:500}
+.setting-input{width:100%;height:32px;background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:8px;padding:0 10px;color:var(--color-text);font-family:var(--font-mono);font-size:16px;outline:none;transition:border-color 200ms}
+.setting-input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,197,94,0.12)}
+select.setting-input{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.timeline-bar{height:64px;border-top:1px solid var(--color-border);background:var(--color-bg-panel);display:flex;align-items:center;padding:0 var(--space-md);gap:12px;flex-shrink:0}
+.frame-strip{display:flex;gap:4px;flex:1;overflow-x:auto;padding:4px 0}
+.frame-thumb{width:48px;height:48px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-surface);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all 150ms}
+.frame-thumb:hover{border-color:var(--cyan)}
+.frame-thumb.active{border-color:var(--cyan);box-shadow:0 0 8px rgba(34,197,94,0.2)}
+.play-btn{width:38px;height:38px;border-radius:50%;background:var(--cyan);color:#0F172A;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all 200ms;border:none}
+.play-btn:hover{box-shadow:0 0 20px rgba(34,197,94,0.35)}
+/* ===== RESPONSIVE ===== */
+@media(min-width:1440px){.container{max-width:1200px}.hero-grid{gap:var(--space-3xl)}}
+@media(max-width:1024px){.hero-grid{grid-template-columns:1fr;gap:var(--space-xl)}.hero-preview{max-width:480px}}
+@media(max-width:768px){
+  .features-grid,.pricing-grid{grid-template-columns:1fr}
+  .steps-grid{grid-template-columns:1fr}.step-arrow{display:none}
+  .nav-links a:not(:last-child){display:none}
+  .editor-body{grid-template-columns:1fr}.panel{display:none}
+  section{padding:var(--space-2xl) var(--space-md)}
+}
+@media(max-width:375px){
+  h1{font-size:32px!important}
+  .section-title{font-size:24px}
+  .hero-stats{flex-direction:column;gap:var(--space-md)}
+  .price-amount{font-size:28px}
+  nav{top:0;left:0;right:0;border-radius:0}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<!-- NAV (floating per MASTER.md) -->
+<nav>
+<div class="nav-inner">
+  <a class="nav-logo" onclick="showPage('landing')">
+    <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="8" height="8" rx="2" fill="#22C55E"/><rect x="13" y="2" width="9" height="8" rx="2" fill="#F59E0B"/><rect x="2" y="13" width="8" height="9" rx="2" fill="#22C55E"/><rect x="13" y="13" width="9" height="9" rx="2" stroke="#64748B" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/></svg>
+    SPRITEFORGE
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#">Docs</a>
+    <button class="btn btn-cta btn-sm" onclick="showPage('editor')">Open Editor</button>
+  </div>
+</div>
+</nav>
+<!-- ===== LANDING ===== -->
+<div id="landing" class="page active">
+
+<!-- HERO -->
+<section style="padding-top:88px;padding-bottom:var(--space-3xl)">
+<div class="container">
+  <div class="hero-grid">
+    <div>
+      <div class="tag tag-cyan" style="margin-bottom:var(--space-lg)"><span class="pulse-dot"></span> NOW IN PUBLIC BETA</div>
+      <h1 style="font-size:48px;line-height:1;color:#fff;margin-bottom:var(--space-lg)">PACK SPRITES.<br><span style="color:var(--cyan)">SHIP GAMES.</span></h1>
+      <p style="font-family:var(--font-body);font-weight:400;font-size:16px;color:var(--color-text-dim);line-height:1.7;margin-bottom:var(--space-xl);max-width:460px">
+        AI-powered sprite sheet generator with MaxRects packing, animation preview, and one-click export for Phaser, PixiJS, Unity &amp; Godot. Free. In your browser.
+      </p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-cta btn-lg" onclick="showPage('editor')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21"/></svg>
+          Start Free
+        </button>
+        <a href="#pricing" class="btn btn-ghost btn-lg">View Pricing</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-val">15+</span><span class="stat-label">Export Formats</span></div>
+        <div class="stat"><span class="stat-val">100%</span><span class="stat-label">Client-Side</span></div>
+        <div class="stat"><span class="stat-val">0</span><span class="stat-label">Install Required</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="hero-preview">
+        <div class="preview-header"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span><span style="margin-left:auto;font-family:var(--font-mono);font-size:10px;color:var(--color-text-muted)">spriteforge.app/editor</span></div>
+        <div class="preview-canvas">
+          <div class="sprite-grid">
+            <div class="sg-cell" style="background:var(--cyan-dim);border-color:rgba(34,197,94,0.3)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg></div>
+            <div class="sg-cell" style="background:var(--amber-dim);border-color:rgba(245,158,11,0.3)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+            <div class="sg-cell" style="background:var(--green-dim);border-color:rgba(34,197,94,0.3)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="sg-cell" style="background:var(--red-dim);border-color:rgba(239,68,68,0.3)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="3" stroke-linecap="round"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="3" stroke-linecap="round"/></svg></div>
+            <div class="sg-cell sg-wide" style="background:var(--cyan-dim);border-color:rgba(34,197,94,0.2)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+            <div class="sg-cell" style="background:var(--amber-dim);border-color:rgba(245,158,11,0.2)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></div>
+            <div class="sg-cell" style="background:var(--green-dim);border-color:rgba(34,197,94,0.2)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><path d="M6 3h12l4 6-10 13L2 9z"/></svg></div>
+          </div>
+          <div class="preview-info">
+            <span class="tag tag-cyan" style="font-size:9px">1024 x 512</span>
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--color-text-muted)">7 sprites · MaxRects · 94% fill</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" style="border-top:1px solid var(--color-border)">
+<div class="container">
+  <div class="section-header">
+    <div class="tag tag-cyan" style="margin-bottom:12px;display:inline-flex">CORE FEATURES</div>
+    <h2 class="section-title">EVERYTHING YOU NEED TO <span>SHIP SPRITES</span></h2>
+    <p class="section-desc">From AI generation to engine-ready export — one tool, zero installs, all in your browser.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="tag tag-amber feature-tag">AI</span>
+      <div class="feature-icon" style="background:var(--cyan-dim)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><path d="M12 2a4 4 0 014 4c0 1.1-.9 2-2 2h-4a2 2 0 01-2-2 4 4 0 014-4z"/><path d="M8 8v8a4 4 0 008 0V8"/><circle cx="9" cy="13" r="1" fill="#22C55E"/><circle cx="15" cy="13" r="1" fill="#22C55E"/></svg></div>
+      <h3>AI SPRITE GENERATION</h3>
+      <p>Describe your character or object in plain text. Get consistent, style-matched sprite frames ready for animation. Pixel art, hand-drawn, or flat — you pick.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:var(--amber-dim)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="5" rx="1"/><rect x="14" y="10" width="8" height="5" rx="1"/><rect x="2" y="13" width="8" height="9" rx="1"/><rect x="14" y="18" width="8" height="4" rx="1"/></svg></div>
+      <h3>SMART MAXRECTS PACKING</h3>
+      <p>Same algorithm as TexturePacker. Automatic rotation, transparent trimming, power-of-two alignment. Optimal GPU-friendly sheets every time.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:var(--green-dim)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><rect x="2" y="7" width="5" height="5" rx="1"/><rect x="9.5" y="7" width="5" height="5" rx="1"/><rect x="17" y="7" width="5" height="5" rx="1"/><path d="M4.5 15v3M12 15v3M19.5 15v3" stroke-dasharray="2 2"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
+      <h3>ANIMATION WORKFLOW</h3>
+      <p>Frame sequence preview with adjustable FPS. Onion skin overlay for alignment. Drag-to-reorder frames. Export as sprite sheet or animated GIF.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:var(--red-dim)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20" opacity="0.5"/></svg></div>
+      <h3>ENGINE INTEGRATION</h3>
+      <p>One-click export with copy-paste code snippets for Phaser 3, PixiJS, Unity, Godot, and CSS sprites. JSON atlas, .tres, C# — all covered.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section style="border-top:1px solid var(--color-border)">
+<div class="container">
+  <div class="section-header">
+    <h2 class="section-title">THREE STEPS TO <span>GAME-READY</span> SPRITES</h2>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <h3>UPLOAD OR GENERATE</h3>
+      <p>Drag &amp; drop your sprite images, or describe what you need and let AI generate consistent frames for you.</p>
+      <span class="step-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <h3>PACK &amp; PREVIEW</h3>
+      <p>MaxRects algorithm packs sprites optimally. Preview animations in real-time. Adjust padding, trim, and layout.</p>
+      <span class="step-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <h3>EXPORT &amp; SHIP</h3>
+      <p>Download your sprite sheet + data file in 15+ formats. Copy engine-specific code snippets. Ship your game.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="border-top:1px solid var(--color-border)">
+<div class="container">
+  <div class="section-header">
+    <h2 class="section-title">SIMPLE <span>PRICING</span></h2>
+    <p class="section-desc">Free forever for basic packing. Upgrade when you need AI generation and pro exports.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <h3>FREE</h3>
+      <div class="price-amount">$0<span> /forever</span></div>
+      <p class="price-desc">Perfect for getting started</p>
+      <ul class="price-features">
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>MaxRects smart packing</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Transparent trimming</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>JSON + CSS export</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Basic animation preview</li>
+        <li><svg class="cross" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span style="opacity:0.45">AI generation (3/day)</span></li>
+        <li><svg class="cross" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span style="opacity:0.45">Engine code snippets</span></li>
+      </ul>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center">Get Started</button>
+    </div>
+    <div class="price-card featured">
+      <div class="tag tag-cyan" style="margin-bottom:12px">MOST POPULAR</div>
+      <h3>PRO</h3>
+      <div class="price-amount">$9.99<span> /month</span></div>
+      <p class="price-desc">For serious game developers</p>
+      <ul class="price-features">
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Everything in Free</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>AI generation (50/day)</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>15+ export formats</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Engine code snippets</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Onion skin + advanced anim</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Cloud project saves</li>
+      </ul>
+      <button class="btn btn-cta" style="width:100%;justify-content:center">Start Pro Trial</button>
+    </div>
+    <div class="price-card">
+      <h3>TEAM</h3>
+      <div class="price-amount">$29.99<span> /month</span></div>
+      <p class="price-desc">For studios and teams</p>
+      <ul class="price-features">
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Everything in Pro</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Unlimited AI generation</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Unlimited batch processing</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Team shared projects</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Priority support</li>
+        <li><svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Custom export templates</li>
+      </ul>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center">Contact Sales</button>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container" style="display:flex;align-items:center;justify-content:space-between">
+    <p style="display:flex;align-items:center;gap:var(--space-sm)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="8" height="8" rx="2" fill="#22C55E"/><rect x="13" y="2" width="9" height="8" rx="2" fill="#F59E0B"/><rect x="2" y="13" width="8" height="9" rx="2" fill="#22C55E"/><rect x="13" y="13" width="9" height="9" rx="2" stroke="#64748B" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/></svg>
+      SpriteForge &copy; 2026
+    </p>
+    <div style="display:flex;gap:var(--space-lg)">
+      <a href="#" style="font-size:12px;color:var(--color-text-muted);cursor:pointer">Privacy</a>
+      <a href="#" style="font-size:12px;color:var(--color-text-muted);cursor:pointer">Terms</a>
+      <a href="#" style="font-size:12px;color:var(--color-text-muted);cursor:pointer">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+</div>
+<!-- ===== EDITOR ===== -->
+<div id="editor-page" class="page">
+
+<!-- Toolbar -->
+<div class="editor-toolbar">
+  <div class="toolbar-group">
+    <button class="tool-btn" title="New Project"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></button>
+    <button class="tool-btn" title="Open"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></button>
+    <button class="tool-btn" title="Save"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
+  </div>
+  <div class="toolbar-group">
+    <button class="tool-btn" title="Undo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg></button>
+    <button class="tool-btn" title="Redo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.13-9.36L23 10"/></svg></button>
+  </div>
+  <div class="toolbar-group">
+    <button class="tool-btn" title="Zoom Out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
+    <span style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-dim);padding:0 4px;min-width:36px;text-align:center">100%</span>
+    <button class="tool-btn" title="Zoom In"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
+  </div>
+  <div class="toolbar-group">
+    <button class="tool-btn active" title="Select"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg></button>
+    <button class="tool-btn" title="Move"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg></button>
+  </div>
+  <div class="toolbar-group" style="border-right:none">
+    <span style="font-family:var(--font-mono);font-size:10px;color:var(--color-text-muted)">7 sprites · 1024x512 · 94%</span>
+  </div>
+  <div class="toolbar-group" style="border-right:none">
+    <button class="btn btn-cta btn-sm">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export
+    </button>
+  </div>
+</div>
+
+<!-- Editor Body -->
+<div class="editor-body">
+  <!-- Left Panel: Sprites -->
+  <div class="panel">
+    <div class="panel-header">SPRITES (7)</div>
+    <div class="sprite-item selected">
+      <div class="sprite-thumb" style="background:var(--cyan-dim)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg></div>
+      <div><div class="sprite-name">wizard_idle</div><div class="sprite-size">64 x 64</div></div>
+    </div>
+    <div class="sprite-item">
+      <div class="sprite-thumb" style="background:var(--amber-dim)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+      <div><div class="sprite-name">star_pickup</div><div class="sprite-size">32 x 32</div></div>
+    </div>
+    <div class="sprite-item">
+      <div class="sprite-thumb" style="background:var(--green-dim)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <div><div class="sprite-name">shield_icon</div><div class="sprite-size">48 x 48</div></div>
+    </div>
+    <div class="sprite-item">
+      <div class="sprite-thumb" style="background:var(--red-dim)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="3" stroke-linecap="round"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="3" stroke-linecap="round"/></svg></div>
+      <div><div class="sprite-name">enemy_slime</div><div class="sprite-size">64 x 64</div></div>
+    </div>
+    <div class="sprite-item">
+      <div class="sprite-thumb" style="background:var(--cyan-dim)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      <div><div class="sprite-name">arrow_right</div><div class="sprite-size">128 x 32</div></div>
+    </div>
+    <div class="sprite-item">
+      <div class="sprite-thumb" style="background:var(--amber-dim)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></div>
+      <div><div class="sprite-name">heart_hp</div><div class="sprite-size">24 x 24</div></div>
+    </div>
+    <div class="sprite-item">
+      <div class="sprite-thumb" style="background:var(--green-dim)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><path d="M6 3h12l4 6-10 13L2 9z"/></svg></div>
+      <div><div class="sprite-name">gem_green</div><div class="sprite-size">24 x 24</div></div>
+    </div>
+    <div style="padding:12px 14px">
+      <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Sprites
+      </button>
+    </div>
+    <div class="panel-header" style="margin-top:var(--space-sm)">AI GENERATE</div>
+    <div style="padding:8px 14px">
+      <textarea style="width:100%;height:64px;background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:6px;padding:8px;color:var(--color-text);font-family:var(--font-body);font-size:12px;resize:none;outline:none;transition:border-color 200ms" placeholder="Describe a sprite... e.g. 'pixel art knight walking animation 4 frames'"></textarea>
+      <button class="btn btn-amber btn-sm" style="width:100%;justify-content:center;margin-top:6px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.1-.9 2-2 2h-4a2 2 0 01-2-2 4 4 0 014-4z"/><path d="M8 8v8a4 4 0 008 0V8"/></svg>
+        Generate with AI
+      </button>
+    </div>
+  </div>
+
+  <!-- Center: Canvas -->
+  <div class="canvas-area">
+    <div class="ruler-h">
+      <div class="r-tick">0</div><div class="r-tick">48</div><div class="r-tick">96</div><div class="r-tick">144</div><div class="r-tick">192</div><div class="r-tick">240</div><div class="r-tick">288</div><div class="r-tick">336</div><div class="r-tick">384</div><div class="r-tick">432</div><div class="r-tick">480</div>
+    </div>
+    <div class="ruler-v"></div>
+    <div class="canvas-content">
+      <!-- Packed sprites with SVG icons -->
+      <div class="packed-sprite" style="left:8px;top:8px;width:120px;height:120px;background:var(--cyan-dim);border-color:rgba(34,197,94,0.35)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg><span>64x64</span></div>
+      <div class="packed-sprite" style="left:136px;top:8px;width:60px;height:60px;background:var(--amber-dim);border-color:rgba(245,158,11,0.35)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+      <div class="packed-sprite" style="left:204px;top:8px;width:90px;height:90px;background:var(--green-dim);border-color:rgba(34,197,94,0.35)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <div class="packed-sprite" style="left:302px;top:8px;width:120px;height:120px;background:var(--red-dim);border-color:rgba(239,68,68,0.35)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg><span>64x64</span></div>
+      <div class="packed-sprite" style="left:8px;top:136px;width:240px;height:56px;background:var(--cyan-dim);border-color:rgba(34,197,94,0.25)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg><span>128x32</span></div>
+      <div class="packed-sprite" style="left:256px;top:136px;width:48px;height:48px;background:var(--amber-dim);border-color:rgba(245,158,11,0.25)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></div>
+      <div class="packed-sprite" style="left:312px;top:136px;width:48px;height:48px;background:var(--green-dim);border-color:rgba(34,197,94,0.25)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><path d="M6 3h12l4 6-10 13L2 9z"/></svg></div>
+    </div>
+  </div>
+
+  <!-- Right Panel: Settings -->
+  <div class="panel" style="border-right:none;border-left:1px solid var(--color-border)">
+    <div class="panel-header">CANVAS SETTINGS</div>
+    <div class="setting-group">
+      <label class="setting-label" for="s-width">Width</label>
+      <input class="setting-input" id="s-width" type="number" value="1024">
+    </div>
+    <div class="setting-group">
+      <label class="setting-label" for="s-height">Height</label>
+      <input class="setting-input" id="s-height" type="number" value="512">
+    </div>
+    <div class="setting-group">
+      <label class="setting-label" for="s-padding">Padding</label>
+      <input class="setting-input" id="s-padding" type="number" value="2">
+    </div>
+    <div class="setting-group">
+      <label class="setting-label" for="s-algo">Algorithm</label>
+      <select class="setting-input" id="s-algo">
+        <option>MaxRects Best Short Side</option>
+        <option>MaxRects Best Long Side</option>
+        <option>MaxRects Best Area</option>
+        <option>Basic Grid</option>
+      </select>
+    </div>
+    <div class="panel-header" style="margin-top:var(--space-sm)">EXPORT</div>
+    <div class="setting-group">
+      <label class="setting-label" for="s-format">Format</label>
+      <select class="setting-input" id="s-format">
+        <option>PixiJS JSON (Hash)</option>
+        <option>Phaser 3 Atlas</option>
+        <option>Unity JSON</option>
+        <option>Godot .tres</option>
+        <option>CSS Sprites</option>
+        <option>Plain JSON</option>
+      </select>
+    </div>
+    <div class="setting-group">
+      <label class="setting-label" for="s-img">Image Format</label>
+      <select class="setting-input" id="s-img">
+        <option>PNG</option>
+        <option>WebP</option>
+        <option>JPEG</option>
+      </select>
+    </div>
+    <div class="setting-group" style="display:flex;align-items:center;gap:var(--space-sm)">
+      <input type="checkbox" id="trim-chk" checked style="accent-color:var(--cyan);cursor:pointer">
+      <label for="trim-chk" style="font-size:12px;color:var(--color-text-dim);cursor:pointer">Trim transparent pixels</label>
+    </div>
+    <div class="setting-group" style="display:flex;align-items:center;gap:var(--space-sm)">
+      <input type="checkbox" id="pot-chk" checked style="accent-color:var(--cyan);cursor:pointer">
+      <label for="pot-chk" style="font-size:12px;color:var(--color-text-dim);cursor:pointer">Power of 2 (GPU)</label>
+    </div>
+    <div class="setting-group" style="display:flex;align-items:center;gap:var(--space-sm)">
+      <input type="checkbox" id="rot-chk" style="accent-color:var(--cyan);cursor:pointer">
+      <label for="rot-chk" style="font-size:12px;color:var(--color-text-dim);cursor:pointer">Allow rotation</label>
+    </div>
+    <div class="panel-header" style="margin-top:var(--space-sm)">CODE SNIPPET</div>
+    <div style="padding:8px 14px">
+      <pre style="background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:6px;padding:10px;font-family:var(--font-mono);font-size:10px;color:var(--cyan);overflow-x:auto;line-height:1.6"><code>// Phaser 3
+this.load.atlas(
+  'sprites',
+  'sheet.png',
+  'sheet.json'
+);
+
+// In create()
+this.add.sprite(
+  400, 300, 'sprites',
+  'wizard_idle'
+);</code></pre>
+      <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;margin-top:6px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy Code
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="timeline-bar">
+  <button class="play-btn" aria-label="Play animation">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
+  </button>
+  <span style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-muted);min-width:52px">12 FPS</span>
+  <div class="frame-strip">
+    <div class="frame-thumb active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-3 3-5 6-5s6 2 6 5"/></svg></div>
+    <div class="frame-thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-3 3-5 6-5s6 2 6 5"/></svg></div>
+    <div class="frame-thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-3 3-5 6-5s6 2 6 5"/></svg></div>
+    <div class="frame-thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-3 3-5 6-5s6 2 6 5"/></svg></div>
+    <div class="frame-thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8"/></svg></div>
+    <div class="frame-thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><path d="M12 22s6-3 6-8V6l-6-2-6 2v8c0 5 6 8 6 8z"/></svg></div>
+    <div class="frame-thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.5"><circle cx="12" cy="12" r="8"/></svg></div>
+    <div class="frame-thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="14 7 19 12 14 17"/></svg></div>
+    <div class="frame-thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5"><path d="M20 4a5 5 0 00-7 0L12 5l-1-1a5 5 0 00-7 7l8 9 8-9a5 5 0 000-7z"/></svg></div>
+    <div class="frame-thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5"><path d="M6 3h12l4 6-10 13L2 9z"/></svg></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:var(--space-sm)">
+    <span style="font-family:var(--font-mono);font-size:10px;color:var(--color-text-muted)">1/10</span>
+    <button class="tool-btn" title="Onion Skin" aria-label="Toggle onion skin"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6" opacity="0.5"/><circle cx="12" cy="12" r="2" opacity="0.3"/></svg></button>
+    <button class="tool-btn" title="Loop" aria-label="Toggle loop"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg></button>
+  </div>
+</div>
+
+</div>
+<script>
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  if(p==='editor'){document.getElementById('editor-page').classList.add('active');document.body.style.overflow='hidden'}
+  else{document.getElementById('landing').classList.add('active');document.body.style.overflow=''}
+}
+</script>
+</body>
+</html>

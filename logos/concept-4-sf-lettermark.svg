@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <!-- Concept D: SF Negative Space Ligature — Letters carved from pixel block -->
+  <g transform="translate(8,8)">
+    <!-- Pixel noise block background -->
+    <rect x="4" y="4" width="80" height="80" rx="6" fill="#4F46E5"/>
+    <!-- Texture: scattered pixel variations -->
+    <rect x="4" y="4" width="20" height="20" rx="0" fill="#4338CA" opacity="0.5"/>
+    <rect x="44" y="4" width="20" height="20" rx="0" fill="#5B21B6" opacity="0.4"/>
+    <rect x="24" y="24" width="20" height="20" rx="0" fill="#4338CA" opacity="0.3"/>
+    <rect x="64" y="24" width="20" height="20" rx="0" fill="#5B21B6" opacity="0.5"/>
+    <rect x="4" y="44" width="20" height="20" rx="0" fill="#5B21B6" opacity="0.35"/>
+    <rect x="44" y="44" width="20" height="20" rx="0" fill="#4338CA" opacity="0.45"/>
+    <rect x="24" y="64" width="20" height="20" rx="0" fill="#5B21B6" opacity="0.3"/>
+    <rect x="64" y="64" width="20" height="20" rx="0" fill="#4338CA" opacity="0.4"/>
+    <!-- "S" carved out — negative space, pixel-block style -->
+    <!-- S top bar -->
+    <rect x="12" y="14" width="26" height="7" rx="1" fill="#0A0818"/>
+    <!-- S left vertical -->
+    <rect x="12" y="14" width="8" height="14" rx="1" fill="#0A0818"/>
+    <!-- S middle bar -->
+    <rect x="12" y="38" width="26" height="7" rx="1" fill="#0A0818"/>
+    <!-- S right vertical bottom -->
+    <rect x="30" y="38" width="8" height="14" rx="1" fill="#0A0818"/>
+    <!-- S bottom bar -->
+    <rect x="12" y="62" width="26" height="7" rx="1" fill="#0A0818"/>
+    <!-- "F" carved out — interlocking with S -->
+    <!-- F left vertical -->
+    <rect x="48" y="14" width="8" height="55" rx="1" fill="#0A0818"/>
+    <!-- F top bar -->
+    <rect x="48" y="14" width="26" height="7" rx="1" fill="#0A0818"/>
+    <!-- F middle bar -->
+    <rect x="48" y="38" width="22" height="7" rx="1" fill="#0A0818"/>
+    <!-- Amber accent: single pixel at intersection -->
+    <rect x="38" y="38" width="7" height="7" rx="1" fill="#F59E0B"/>
+    <!-- Corner accent -->
+    <rect x="76" y="76" width="6" height="6" rx="1" fill="#F59E0B" opacity="0.6"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="130" y="55" font-family="system-ui,-apple-system,sans-serif" font-size="38" font-weight="800" letter-spacing="-1.5" fill="#E8E4F0">Sprite</text>
+  <text x="248" y="55" font-family="system-ui,-apple-system,sans-serif" font-size="38" font-weight="800" letter-spacing="-1.5" fill="#A78BFA">Forge</text>
+  <text x="131" y="78" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="500" letter-spacing="2.5" fill="#5A5478">AI-POWERED SPRITE SHEETS</text>
+</svg>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <!-- Concept C: Onion Skin Stack — 3 layered frames, back to front -->
+  <g transform="translate(10,12)">
+    <!-- Back layer — outline only, dark indigo -->
+    <rect x="24" y="24" width="48" height="48" rx="4" fill="none" stroke="#4338CA" stroke-width="2" opacity="0.5"/>
+    <!-- Middle layer — semi-filled grid pattern, purple -->
+    <rect x="14" y="14" width="48" height="48" rx="4" fill="#1E1B4B" stroke="#6D28D9" stroke-width="1.5"/>
+    <!-- Grid lines inside middle layer -->
+    <line x1="14" y1="30" x2="62" y2="30" stroke="#5B21B6" stroke-width="0.5" opacity="0.5"/>
+    <line x1="14" y1="46" x2="62" y2="46" stroke="#5B21B6" stroke-width="0.5" opacity="0.5"/>
+    <line x1="30" y1="14" x2="30" y2="62" stroke="#5B21B6" stroke-width="0.5" opacity="0.5"/>
+    <line x1="46" y1="14" x2="46" y2="62" stroke="#5B21B6" stroke-width="0.5" opacity="0.5"/>
+    <!-- Some filled cells in middle layer -->
+    <rect x="15" y="15" width="15" height="15" fill="#7C3AED" opacity="0.3"/>
+    <rect x="31" y="31" width="15" height="15" fill="#7C3AED" opacity="0.25"/>
+    <rect x="47" y="15" width="14" height="15" fill="#7C3AED" opacity="0.2"/>
+    <!-- Front layer — solid amber with character silhouette cutout -->
+    <rect x="4" y="4" width="48" height="48" rx="4" fill="#F59E0B"/>
+    <!-- Character silhouette cut from amber (dark negative space) -->
+    <!-- Simple knight/warrior pixel silhouette -->
+    <rect x="22" y="10" width="12" height="8" rx="1" fill="#0A0818"/><!-- head -->
+    <rect x="20" y="18" width="16" height="14" rx="1" fill="#0A0818"/><!-- body -->
+    <rect x="16" y="20" width="4" height="10" rx="0.5" fill="#0A0818"/><!-- left arm -->
+    <rect x="36" y="18" width="4" height="14" rx="0.5" fill="#0A0818"/><!-- sword -->
+    <rect x="20" y="32" width="6" height="12" rx="1" fill="#0A0818"/><!-- left leg -->
+    <rect x="30" y="32" width="6" height="12" rx="1" fill="#0A0818"/><!-- right leg -->
+    <!-- Subtle shadow under front card -->
+    <rect x="4" y="50" width="48" height="4" rx="2" fill="#F59E0B" opacity="0.08"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="130" y="55" font-family="system-ui,-apple-system,sans-serif" font-size="38" font-weight="800" letter-spacing="-1.5" fill="#E8E4F0">Sprite</text>
+  <text x="248" y="55" font-family="system-ui,-apple-system,sans-serif" font-size="38" font-weight="800" letter-spacing="-1.5" fill="#A78BFA">Forge</text>
+  <text x="131" y="78" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="500" letter-spacing="2.5" fill="#5A5478">AI-POWERED SPRITE SHEETS</text>
+</svg>
