@@ -1,5 +1,5 @@
-import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export function Hero() {
   return (
@@ -207,100 +207,29 @@ export function Hero() {
 
             {/* Packed sprite cells */}
             {[
-              { l: 0, t: 0, w: 84, h: 96, bg: "rgba(6,182,212,0.14)", icon: "warrior" },
-              { l: 85, t: 0, w: 64, h: 72, bg: "rgba(8,145,178,0.11)", icon: "char" },
-              { l: 150, t: 0, w: 64, h: 72, bg: "rgba(14,116,144,0.11)", icon: "char" },
-              { l: 215, t: 0, w: 28, h: 38, bg: "rgba(245,158,11,0.10)", icon: "sword" },
-              { l: 244, t: 0, w: 24, h: 24, bg: "rgba(245,158,11,0.08)", icon: "coin" },
-              { l: 215, t: 39, w: 28, h: 32, bg: "rgba(34,197,94,0.10)", icon: "potion" },
-              { l: 244, t: 25, w: 24, h: 24, bg: "rgba(6,182,212,0.08)", icon: "diamond" },
-              { l: 85, t: 73, w: 68, h: 78, bg: "rgba(14,116,144,0.13)", icon: "char" },
-              { l: 154, t: 73, w: 64, h: 72, bg: "rgba(6,182,212,0.11)", icon: "char" },
-              { l: 219, t: 72, w: 26, h: 26, bg: "rgba(8,145,178,0.08)", icon: "shield" },
-              { l: 246, t: 50, w: 22, h: 22, bg: "rgba(239,68,68,0.10)", icon: "heart" },
-              { l: 219, t: 99, w: 24, h: 28, bg: "rgba(245,158,11,0.08)", icon: "key" },
-              { l: 0, t: 97, w: 64, h: 72, bg: "rgba(8,145,178,0.11)", icon: "char" },
-              { l: 65, t: 152, w: 64, h: 68, bg: "rgba(6,182,212,0.11)", icon: "char" },
-              { l: 130, t: 146, w: 64, h: 72, bg: "rgba(14,116,144,0.11)", icon: "char" },
-            ].map((c, i) => {
-              const icons: Record<string, React.ReactNode> = {
-                warrior: (<svg viewBox="0 0 32 32" className="opacity-80" style={{ width: "75%", height: "75%" }}>
-                  <rect x="13" y="3" width="7" height="6" rx="1" fill="#22D3EE" />
-                  <rect x="11" y="10" width="10" height="8" fill="#06B6D4" />
-                  <rect x="11" y="18" width="4" height="8" fill="#0891B2" />
-                  <rect x="17" y="18" width="4" height="8" fill="#0891B2" />
-                  <rect x="22" y="6" width="3" height="14" fill="#F59E0B" />
-                  <rect x="21" y="4" width="5" height="3" fill="#FBBF24" />
-                </svg>),
-                char: (<svg viewBox="0 0 32 32" className="opacity-80" style={{ width: "75%", height: "75%" }}>
-                  <rect x="13" y="3" width="7" height="6" rx="1" fill="#22D3EE" />
-                  <rect x="11" y="10" width="10" height="8" fill="#06B6D4" />
-                  <rect x="11" y="18" width="4" height="8" fill="#0891B2" />
-                  <rect x="17" y="18" width="4" height="8" fill="#0891B2" />
-                </svg>),
-                sword: (<svg viewBox="0 0 32 32" className="opacity-80" style={{ width: "65%", height: "65%" }}>
-                  <rect x="15" y="2" width="3" height="18" fill="#F59E0B" />
-                  <rect x="11" y="20" width="11" height="3" fill="#FBBF24" />
-                  <rect x="14" y="23" width="5" height="5" fill="#D97706" />
-                </svg>),
-                coin: (<svg viewBox="0 0 32 32" className="opacity-80" style={{ width: "65%", height: "65%" }}>
-                  <circle cx="16" cy="16" r="10" fill="#F59E0B" />
-                  <circle cx="16" cy="16" r="6" fill="#FBBF24" />
-                </svg>),
-                potion: (<svg viewBox="0 0 32 32" className="opacity-80" style={{ width: "65%", height: "65%" }}>
-                  <rect x="13" y="2" width="7" height="4" fill="#86EFAC" />
-                  <rect x="11" y="6" width="11" height="3" fill="#4ADE80" />
-                  <rect x="9" y="9" width="15" height="16" rx="2" fill="#22C55E" />
-                  <rect x="13" y="12" width="3" height="8" fill="#86EFAC" opacity="0.5" />
-                </svg>),
-                diamond: (<svg viewBox="0 0 32 32" className="opacity-80" style={{ width: "65%", height: "65%" }}>
-                  <polygon points="16,3 27,14 16,29 5,14" fill="#22D3EE" />
-                  <polygon points="16,3 21,14 16,25 11,14" fill="#67E8F9" opacity="0.6" />
-                </svg>),
-                shield: (<svg viewBox="0 0 32 32" className="opacity-80" style={{ width: "65%", height: "65%" }}>
-                  <path d="M16 3 L26 8 L26 18 Q26 26 16 30 Q6 26 6 18 L6 8 Z" fill="#0891B2" />
-                  <path d="M16 7 L22 10 L22 17 Q22 23 16 26 Q10 23 10 17 L10 10 Z" fill="#22D3EE" opacity="0.4" />
-                </svg>),
-                heart: (<svg viewBox="0 0 32 32" className="opacity-80" style={{ width: "65%", height: "65%" }}>
-                  <path d="M16 28 Q4 18 4 10 Q4 4 10 4 Q14 4 16 8 Q18 4 22 4 Q28 4 28 10 Q28 18 16 28Z" fill="#EF4444" />
-                  <path d="M16 24 Q8 16 8 11 Q8 7 12 7 Q14 7 16 10" fill="#FCA5A5" opacity="0.4" />
-                </svg>),
-                key: (<svg viewBox="0 0 32 32" className="opacity-80" style={{ width: "65%", height: "65%" }}>
-                  <circle cx="16" cy="10" r="6" fill="#F59E0B" />
-                  <circle cx="16" cy="10" r="3" fill="#D97706" />
-                  <rect x="14" y="15" width="4" height="14" fill="#FBBF24" />
-                  <rect x="18" y="22" width="4" height="3" fill="#FBBF24" />
-                  <rect x="18" y="26" width="3" height="3" fill="#FBBF24" />
-                </svg>),
-              };
-              return (
-                <div
-                  key={i}
-                  className="absolute flex items-center justify-center overflow-hidden"
-                  style={{
-                    left: c.l,
-                    top: c.t,
-                    width: c.w,
-                    height: c.h,
-                    background: c.bg,
-                    border: "1px solid rgba(6,182,212,0.2)",
-                    transition: "all 0.12s",
-                  }}
-                >
-                  {icons[c.icon]}
-                </div>
-              );
-            })}
-
-            {/* Waste areas */}
-            <div
-              className="absolute"
-              style={{ left: 0, top: 170, width: 64, height: 50, border: "1px dashed rgba(255,255,255,0.04)" }}
-            />
-            <div
-              className="absolute"
-              style={{ left: 195, top: 128, width: 48, height: 38, border: "1px dashed rgba(255,255,255,0.04)" }}
-            />
+              { l: 0, t: 0, w: 84, h: 84, src: "/examples/knight.png" },
+              { l: 85, t: 0, w: 84, h: 84, src: "/examples/mage.png" },
+              { l: 170, t: 0, w: 64, h: 64, src: "/examples/sword.png" },
+              { l: 235, t: 0, w: 32, h: 32, src: "/examples/potion.png" },
+              { l: 235, t: 33, w: 32, h: 32, src: "/examples/treasure.png" },
+              { l: 0, t: 85, w: 84, h: 84, src: "/examples/skeleton.png" },
+              { l: 85, t: 85, w: 84, h: 84, src: "/examples/dragon.png" },
+              { l: 170, t: 65, w: 64, h: 64, src: "/examples/slime.png" },
+              { l: 170, t: 130, w: 48, h: 48, src: "/examples/fairy.png" },
+              { l: 235, t: 66, w: 32, h: 32, src: "/examples/mushroom.png" },
+            ].map((c, i) => (
+              <div
+                key={i}
+                className="absolute overflow-hidden"
+                style={{
+                  left: c.l, top: c.t, width: c.w, height: c.h,
+                  border: "1px solid rgba(6,182,212,0.2)",
+                  background: "rgba(6,182,212,0.06)",
+                }}
+              >
+                <Image src={c.src} alt="" width={c.w} height={c.h} style={{ width: "100%", height: "100%", objectFit: "cover", imageRendering: "pixelated" }} />
+              </div>
+            ))}
 
             {/* Meta bar */}
             <div
