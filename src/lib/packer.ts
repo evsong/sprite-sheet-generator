@@ -8,7 +8,7 @@ export function packSprites(
   if (sprites.length === 0) return [];
 
   const packer = new MaxRectsPacker(config.maxWidth, config.maxHeight, config.padding, {
-    smart: false,
+    smart: true,
     pot: config.pot,
     square: false,
     allowRotation: config.allowRotation,
