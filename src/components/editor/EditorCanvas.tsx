@@ -125,10 +125,20 @@ export function EditorCanvas() {
   }, [addSprites]);
 
   return (
-    <div ref={containerRef} className="relative overflow-hidden"
+    <div ref={containerRef} className="relative overflow-hidden flex flex-col"
       style={{ background: "var(--bg)" }}
       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
       onDrop={handleDrop}>
+      {/* Usage bar above canvas */}
+      {stats && (
+        <div className="flex items-center gap-1 shrink-0" style={{ padding: "4px 8px", fontFamily: "var(--font-mono)", fontSize: 8, zIndex: 2 }}>
+          <span style={{ color: "var(--text-muted)" }}>PACK</span>
+          <div style={{ width: 48, height: 4, background: "var(--bg-elevated)", overflow: "hidden" }}>
+            <span style={{ display: "block", height: "100%", width: `${stats.density}%`, background: "#22C55E" }} />
+          </div>
+          <span style={{ color: "#22C55E", fontWeight: 600 }}>{stats.density.toFixed(1)}%</span>
+        </div>
+      )}
       {/* Checkerboard */}
       <div className="absolute inset-0" style={{
         backgroundSize: "16px 16px",
@@ -141,17 +151,6 @@ export function EditorCanvas() {
         <div className="relative" style={{ transform: `scale(${zoom})`, transformOrigin: "center" }}>
           <canvas ref={canvasRef} onClick={handleCanvasClick} className="cursor-crosshair"
             style={{ outline: "1px solid rgba(6,182,212,0.2)", imageRendering: zoom >= 2 ? "pixelated" : "auto" }} />
-
-          {/* Usage bar overlay */}
-          {stats && (
-            <div className="absolute flex items-center gap-1" style={{ top: 4, left: 4, fontFamily: "var(--font-mono)", fontSize: 8, zIndex: 2 }}>
-              <span style={{ color: "var(--text-muted)" }}>PACK</span>
-              <div style={{ width: 48, height: 4, background: "var(--bg-elevated)", overflow: "hidden" }}>
-                <span style={{ display: "block", height: "100%", width: `${stats.density}%`, background: "#22C55E" }} />
-              </div>
-              <span style={{ color: "#22C55E", fontWeight: 600 }}>{stats.density.toFixed(1)}%</span>
-            </div>
-          )}
         </div>
       </div>
 
