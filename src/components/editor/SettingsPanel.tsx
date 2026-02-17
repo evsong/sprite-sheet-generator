@@ -1,8 +1,32 @@
 import { useEditorStore } from "@/stores/editor-store";
 import { getFormatGroups, isFormatFree } from "@/lib/export-formats";
+import { generateCodeSnippet } from "@/lib/exporter";
 import { useSession } from "next-auth/react";
+import { useMemo, useState } from "react";
 
 const FORMAT_GROUPS = getFormatGroups();
+
+function useSheetStats() {
+  const bins = useEditorStore((s) => s.bins);
+  const activeBin = useEditorStore((s) => s.activeBin);
+  const sprites = useEditorStore((s) => s.sprites);
+  const config = useEditorStore((s) => s.packingConfig);
+  return useMemo(() => {
+    const bin = bins[activeBin];
+    if (!bin) return null;
+    const usedArea = bin.rects.reduce((sum, r) => sum + r.width * r.height, 0);
+    const totalArea = bin.width * bin.height;
+    const density = totalArea > 0 ? (usedArea / totalArea) * 100 : 0;
+    const vramBytes = totalArea * 4;
+    const isPot = (bin.width & (bin.width - 1)) === 0 && (bin.height & (bin.height - 1)) === 0;
+    return {
+      width: bin.width, height: bin.height,
+      sprites: sprites.length, density, waste: 100 - density,
+      vram: vramBytes < 1024 * 1024 ? `${(vramBytes / 1024).toFixed(1)} KB` : `${(vramBytes / (1024 * 1024)).toFixed(1)} MB`,
+      pot: isPot, drawCalls: bins.length, format: config.exportFormat,
+    };
+  }, [bins, activeBin, sprites.length, config.exportFormat]);
+}
 
 export function SettingsPanel() {
   const config = useEditorStore((s) => s.packingConfig);
@@ -13,6 +37,8 @@ export function SettingsPanel() {
   const { data: session } = useSession();
   const tier = (session?.user as Record<string, unknown> | undefined)?.tier as string ?? "FREE";
   const isPaid = tier === "PRO" || tier === "TEAM";
+  const stats = useSheetStats();
+  const [copied, setCopied] = useState(false);
 
   return (
     <div className="w-56 bg-[#0D0D0D] border-l border-[#1E1E1E] flex flex-col shrink-0 overflow-y-auto">
@@ -22,6 +48,30 @@ export function SettingsPanel() {
           Settings
         </span>
       </div>
+
+      {/* Sheet Stats */}
+      {stats && (
+        <div className="p-3 border-b border-[#1E1E1E]">
+          <span className="font-[family-name:var(--font-mono)] text-[9px] text-[#666] uppercase tracking-wider block mb-2">Sheet Stats</span>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+            {[
+              { label: "Texture", value: `${stats.width}×${stats.height}` },
+              { label: "Format", value: "RGBA8888" },
+              { label: "VRAM", value: stats.vram },
+              { label: "Sprites", value: String(stats.sprites) },
+              { label: "Density", value: `${stats.density.toFixed(1)}%`, highlight: true },
+              { label: "Waste", value: `${stats.waste.toFixed(1)}%` },
+              { label: "POT", value: stats.pot ? "Yes" : "No", highlight: stats.pot },
+              { label: "Draw Calls", value: String(stats.drawCalls) },
+            ].map((row) => (
+              <div key={row.label} className="flex justify-between">
+                <span className="font-[family-name:var(--font-mono)] text-[9px] text-[#666]">{row.label}</span>
+                <span className={`font-[family-name:var(--font-mono)] text-[9px] ${row.highlight ? "text-[#06B6D4]" : "text-[#A0A0A0]"}`}>{row.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="p-3 space-y-4">
         {/* Canvas Size */}
@@ -167,6 +217,52 @@ export function SettingsPanel() {
             </div>
           </div>
         )}
+
+        {/* Code Snippet */}
+        {stats && (
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="font-[family-name:var(--font-mono)] text-[9px] text-[#666] uppercase tracking-wider">Code Snippet</span>
+              {isPaid && (
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(generateCodeSnippet(config.exportFormat, "spritesheet"));
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1500);
+                  }}
+                  className="text-[8px] font-[family-name:var(--font-mono)] text-[#06B6D4] hover:text-[#22D3EE] cursor-pointer transition-colors"
+                >
+                  {copied ? "Copied!" : "Copy"}
+                </button>
+              )}
+            </div>
+            <div className="relative">
+              <pre className={`bg-[#1A1A1A] border border-[#1E1E1E] rounded p-2 text-[9px] font-[family-name:var(--font-mono)] text-[#A0A0A0] overflow-x-auto max-h-32 leading-relaxed ${!isPaid ? "blur-[2px] select-none" : ""}`}>
+                {generateCodeSnippet(config.exportFormat, "spritesheet")}
+              </pre>
+              {!isPaid && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[10px] font-[family-name:var(--font-mono)] text-[#F59E0B] bg-[#0D0D0D]/80 px-2 py-1 rounded">PRO Feature</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Download ZIP */}
+        <button
+          onClick={() => {
+            if (bins.length === 0) return;
+            import("@/lib/exporter").then(({ exportSpriteSheet }) => {
+              const sprites = useEditorStore.getState().sprites;
+              exportSpriteSheet(bins, sprites, config, "spritesheet", { watermark: !isPaid });
+            });
+          }}
+          disabled={bins.length === 0}
+          className="w-full py-2.5 text-[11px] font-[family-name:var(--font-mono)] font-bold text-black bg-[#22C55E] rounded-md hover:brightness-110 transition-all duration-200 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          DOWNLOAD .ZIP
+        </button>
       </div>
     </div>
   );

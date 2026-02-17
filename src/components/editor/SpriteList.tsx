@@ -72,6 +72,62 @@ export function SpriteList() {
     [sprites, processingBg, updateSprite]
   );
 
+  const spriteToBase64 = useCallback((sprite: SpriteItem): string | null => {
+    if (!sprite.image) return null;
+    const c = document.createElement("canvas");
+    c.width = sprite.width;
+    c.height = sprite.height;
+    const ctx = c.getContext("2d");
+    if (!ctx) return null;
+    ctx.drawImage(sprite.image, 0, 0);
+    return c.toDataURL("image/png");
+  }, []);
+
+  const handleAiAction = useCallback(
+    async (spriteId: string, action: "variants" | "recolor" | "upscale" | "extend-frames") => {
+      const sprite = sprites.find((s) => s.id === spriteId);
+      if (!sprite) return;
+      const b64 = spriteToBase64(sprite);
+      if (!b64) return;
+
+      const { addSprites, setAiProgress } = useEditorStore.getState();
+      const total = action === "variants" ? 3 : action === "extend-frames" ? 4 : 1;
+      const label = { variants: "Generating variants", recolor: "Recoloring", upscale: "Upscaling", "extend-frames": "Extending frames" }[action];
+      setAiProgress({ active: true, total, completed: 0, prompt: label });
+
+      try {
+        const res = await fetch("/api/ai/transform", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action, imageBase64: b64, count: total }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setAiProgress({ active: false, total, completed: 0, prompt: label, error: data.error });
+          return;
+        }
+
+        for (let i = 0; i < data.images.length; i++) {
+          const img = new Image();
+          await new Promise<void>((resolve) => { img.onload = () => resolve(); img.src = data.images[i]; });
+          const suffix = action === "upscale" ? "-2x" : `-${action}-${i + 1}`;
+          addSprites([{
+            id: crypto.randomUUID(),
+            name: `${sprite.name}${suffix}`,
+            file: null, image: img,
+            width: img.naturalWidth, height: img.naturalHeight,
+            trimmed: false, isAi: true,
+          }]);
+          setAiProgress({ active: true, total, completed: i + 1, prompt: label });
+        }
+        setTimeout(() => setAiProgress(null), 2000);
+      } catch {
+        setAiProgress({ active: false, total, completed: 0, prompt: label, error: "Network error" });
+      }
+    },
+    [sprites, spriteToBase64]
+  );
+
   const handleContextMenu = (e: React.MouseEvent, spriteId: string) => {
     e.preventDefault();
     selectSprite(spriteId);
@@ -246,14 +302,17 @@ export function SpriteList() {
           >
             {/* AI actions */}
             {[
-              { label: "AI Variants", key: "⌘⇧V" },
-              { label: "AI Recolor", key: "⌘⇧C" },
-              { label: "AI Upscale 2×", key: "⌘⇧U" },
-              { label: "AI Extend Frames", key: "⌘⇧E" },
+              { label: "AI Variants", key: "⌘⇧V", action: "variants" as const },
+              { label: "AI Recolor", key: "⌘⇧C", action: "recolor" as const },
+              { label: "AI Upscale 2×", key: "⌘⇧U", action: "upscale" as const },
+              { label: "AI Extend Frames", key: "⌘⇧E", action: "extend-frames" as const },
             ].map((item) => (
               <button
                 key={item.label}
-                onClick={() => setContextMenu(null)}
+                onClick={() => {
+                  handleAiAction(contextMenu.spriteId, item.action);
+                  setContextMenu(null);
+                }}
                 className="flex items-center justify-between w-full px-3 py-1.5 text-[10px] font-[family-name:var(--font-mono)] text-[#F59E0B] hover:bg-[#F59E0B]/5 transition-colors duration-100 cursor-pointer"
               >
                 <span>{item.label}</span>
