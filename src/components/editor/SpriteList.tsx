@@ -129,12 +129,13 @@ export function SpriteList() {
       <div style={{ padding: "6px 8px", borderBottom: "1px solid var(--border)" }}>
         <h4 style={{ fontFamily: "var(--font-mono)", fontSize: 8, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 5 }}>AI Generate</h4>
         <div className="flex flex-col gap-1">
-          <textarea placeholder="Pixel knight, 8 frames, walk cycle..." className="focus:outline-none focus:border-[var(--amber)]"
+          <textarea placeholder="Pixel knight, 8 frames, walk cycle..." className="focus:outline-none focus:border-[var(--amber)] focus:shadow-[0_0_0_1px_rgba(245,158,11,0.3),0_0_12px_rgba(245,158,11,0.1)]"
             style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)", fontFamily: "var(--font-mono)", fontSize: 9, padding: "4px 6px", resize: "none", height: 38 }} />
           <button onClick={() => setAiModalOpen(true)} className="hover:shadow-[0_0_12px_rgba(245,158,11,0.3)] transition-all duration-200"
             style={{ height: 20, background: "linear-gradient(135deg, #F59E0B, #F97316)", color: "#000", fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             <svg viewBox="0 0 16 16" width="10" height="10" style={{ verticalAlign: "-1px", marginRight: 3 }}>
               <path d="M8 0l1.5 4.5L14 6l-4.5 1.5L8 12l-1.5-4.5L2 6l4.5-1.5z" fill="#000" opacity="0.7" />
+              <path d="M13 10l.75 2.25L16 13l-2.25.75L13 16l-.75-2.25L10 13l2.25-.75z" fill="#000" opacity="0.5" />
             </svg>
             + Generate New...
           </button>
@@ -158,7 +159,7 @@ export function SpriteList() {
                 selectedSpriteId === sprite.id ? "bg-[var(--bg-elevated)] text-[var(--cyan)]" : "text-[var(--text-dim)] hover:bg-[var(--bg-surface)] hover:text-[var(--text)]"
               } ${dragOverIndex === index && dragIndex !== index ? "border-t border-t-[var(--cyan)]" : ""} ${dragIndex === index ? "opacity-40" : ""}`}
               style={{ padding: "2px 4px", fontFamily: "var(--font-mono)", fontSize: 9 }}>
-              <div className="shrink-0 overflow-hidden" style={{ width: 20, height: 20, border: `1px solid ${selectedSpriteId === sprite.id ? "var(--cyan)" : "var(--border)"}`, background: "#0A0A0C" }}>
+              <div className="shrink-0 overflow-hidden" style={{ width: 20, height: 20, border: `1px solid ${selectedSpriteId === sprite.id ? "var(--cyan)" : "var(--border)"}`, background: "#0A0A0C", boxShadow: selectedSpriteId === sprite.id ? "0 0 4px rgba(6,182,212,0.4)" : "none", transition: "border-color 0.12s" }}>
                 {sprite.image && <canvas ref={(canvas) => {
                   if (canvas && sprite.image) { const ctx = canvas.getContext("2d"); if (ctx) { canvas.width = 18; canvas.height = 18; const scale = Math.min(18 / sprite.width, 18 / sprite.height); const w = sprite.width * scale, h = sprite.height * scale; ctx.clearRect(0, 0, 18, 18); ctx.drawImage(sprite.image, (18 - w) / 2, (18 - h) / 2, w, h); } }
                 }} width={18} height={18} />}
