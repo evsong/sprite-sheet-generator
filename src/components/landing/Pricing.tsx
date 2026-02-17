@@ -2,127 +2,103 @@ import Link from "next/link";
 
 const tiers = [
   {
-    name: "FREE",
+    name: "Free",
     price: "$0",
-    period: "forever",
-    cta: "Start Free",
-    ctaStyle: "border border-[#1E1E1E] text-white hover:border-[#06B6D4] hover:text-[#06B6D4]",
+    period: "/forever",
     features: [
-      { text: "MaxRects bin packing", included: true },
-      { text: "Transparent trimming", included: true },
-      { text: "2 export formats (JSON, CSS)", included: true },
-      { text: "3 AI generations / day", included: true },
-      { text: "Up to 20 sprites", included: true },
-      { text: "Basic animation preview", included: true },
-      { text: "All export formats", included: false },
-      { text: "Engine code snippets", included: false },
-      { text: "Cloud project save", included: false },
-      { text: "No watermark", included: false },
+      { text: "Up to 64 sprites per sheet", off: false },
+      { text: "5 export formats", off: false },
+      { text: "Basic packing algorithm", off: false },
+      { text: "Animation preview", off: false },
+      { text: "AI sprite generation", off: true },
+      { text: "Priority support", off: true },
     ],
+    cta: "Start Free",
+    ctaType: "ghost" as const,
+    href: "/editor",
   },
   {
-    name: "PRO",
+    name: "Pro",
     price: "$9.99",
     period: "/month",
-    cta: "Upgrade to PRO",
-    ctaStyle: "bg-[#22C55E] text-black hover:brightness-110",
-    highlight: true,
+    featured: true,
     features: [
-      { text: "MaxRects bin packing", included: true },
-      { text: "Transparent trimming", included: true },
-      { text: "All 6+ export formats", included: true },
-      { text: "50 AI generations / day", included: true },
-      { text: "Up to 200 sprites", included: true },
-      { text: "Advanced animation + onion skin", included: true },
-      { text: "Engine code snippets", included: true },
-      { text: "Cloud project save", included: true },
-      { text: "No watermark", included: true },
-      { text: "Priority support", included: true },
+      { text: "Unlimited sprites per sheet", off: false },
+      { text: "15+ export formats", off: false },
+      { text: "Advanced MaxRects packing", off: false },
+      { text: "Animation preview + onion skin", off: false },
+      { text: "50 AI generations / month", off: false },
+      { text: "Email support", off: false },
     ],
+    cta: "Get Pro",
+    ctaType: "primary" as const,
+    href: "#",
   },
   {
-    name: "TEAM",
+    name: "Team",
     price: "$29.99",
     period: "/month",
-    cta: "Start Team Plan",
-    ctaStyle: "border border-[#1E1E1E] text-white hover:border-[#06B6D4] hover:text-[#06B6D4]",
     features: [
-      { text: "Everything in PRO", included: true },
-      { text: "Unlimited AI generations", included: true },
-      { text: "Unlimited sprites", included: true },
-      { text: "Team project sharing", included: true },
-      { text: "Shared asset library", included: true },
-      { text: "Admin dashboard", included: true },
+      { text: "Everything in Pro", off: false },
+      { text: "5 team seats included", off: false },
+      { text: "Shared asset library", off: false },
+      { text: "200 AI generations / month", off: false },
+      { text: "API access", off: false },
+      { text: "Priority support + Slack", off: false },
     ],
+    cta: "Contact Us",
+    ctaType: "ghost" as const,
+    href: "#",
   },
 ];
 
 export function Pricing() {
   return (
-    <section id="pricing" className="py-20 px-6">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-14">
-          <h2 className="font-[family-name:var(--font-display)] text-3xl md:text-4xl font-bold mb-3">
-            Simple Pricing
-          </h2>
-          <p className="text-[#A0A0A0] max-w-xl mx-auto">
-            Start free. Upgrade when you need more power.
-          </p>
+    <section id="pricing" style={{ padding: "72px 24px", borderBottom: "1px solid var(--border)" }}>
+      <div style={{ maxWidth: "var(--container)", margin: "0 auto" }}>
+        <div style={{ marginBottom: "40px", borderLeft: "2px solid var(--cyan)", paddingLeft: "14px" }}>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, lineHeight: 1, color: "var(--text)", textTransform: "uppercase", letterSpacing: "0.03em" }}>Pricing</div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", marginTop: "6px" }}>No signup required for free tier.</div>
         </div>
-
-        <div className="grid md:grid-cols-3 gap-5">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
           {tiers.map((tier) => (
-            <div
-              key={tier.name}
-              className={`relative p-6 rounded-xl bg-[#0D0D0D] border transition-all duration-200 ${
-                tier.highlight
-                  ? "border-[#22C55E]/50 shadow-[0_0_30px_rgba(34,197,94,0.08)]"
-                  : "border-[#1E1E1E]"
-              }`}
-            >
-              {tier.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#22C55E] text-black text-[10px] font-[family-name:var(--font-mono)] font-bold">
-                  POPULAR
-                </div>
-              )}
-
-              <div className="mb-6">
-                <div className="font-[family-name:var(--font-mono)] text-xs text-[#666666] mb-1">
-                  {tier.name}
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="font-[family-name:var(--font-display)] text-3xl font-bold">
-                    {tier.price}
-                  </span>
-                  <span className="text-sm text-[#666666]">{tier.period}</span>
+            <div key={tier.name} style={{ border: "1px solid", borderColor: tier.featured ? "var(--text)" : "var(--border)", background: "var(--bg-panel)" }}>
+              <div style={{ padding: "20px", borderBottom: "1px solid var(--border)", background: tier.featured ? "var(--bg-elevated)" : undefined }}>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", textTransform: "uppercase", color: tier.featured ? "var(--cyan)" : "var(--text-muted)", letterSpacing: "0.06em", marginBottom: "6px" }}>{tier.name}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "28px", fontWeight: 700, color: "#fff" }}>
+                  {tier.price}<span style={{ fontSize: "12px", fontWeight: 400, color: "var(--text-muted)" }}>{tier.period}</span>
                 </div>
               </div>
-
-              <ul className="space-y-2.5 mb-8">
-                {tier.features.map((f) => (
-                  <li key={f.text} className="flex items-start gap-2 text-sm">
-                    {f.included ? (
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0">
-                        <path d="M3 8l3 3 7-7" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    ) : (
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0">
-                        <path d="M4 8h8" stroke="#333" strokeWidth="2" strokeLinecap="round" />
-                      </svg>
-                    )}
-                    <span className={f.included ? "text-[#A0A0A0]" : "text-[#444]"}>
+              <div style={{ padding: "20px" }}>
+                <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
+                  {tier.features.map((f) => (
+                    <li key={f.text} style={{ fontSize: "12px", color: "var(--text-dim)", display: "flex", alignItems: "center", gap: "8px", opacity: f.off ? 0.35 : 1, textDecoration: f.off ? "line-through" : "none" }}>
+                      <span style={{ width: "3px", height: "3px", background: f.off ? "var(--text-muted)" : "var(--cyan)", flexShrink: 0 }} />
                       {f.text}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href={tier.name === "FREE" ? "/editor" : "#"}
-                className={`block w-full text-center py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${tier.ctaStyle}`}
-              >
-                {tier.cta}
-              </Link>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={tier.href}
+                  className="inline-flex items-center justify-center cursor-pointer"
+                  style={{
+                    width: "100%",
+                    height: "30px",
+                    padding: "0 14px",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                    borderRadius: "2px",
+                    transition: "all 0.12s",
+                    ...(tier.ctaType === "primary"
+                      ? { background: "var(--text)", color: "#000", border: "1px solid var(--text)" }
+                      : { background: "transparent", color: "var(--text-dim)", border: "1px solid var(--border)" }),
+                  }}
+                >
+                  {tier.cta}
+                </Link>
+              </div>
             </div>
           ))}
         </div>

@@ -1,52 +1,21 @@
-const steps = [
-  {
-    num: "01",
-    title: "Upload or Generate",
-    description: "Drag-and-drop your sprite images or describe what you need — AI generates style-consistent frames instantly.",
-    color: "#F59E0B",
-  },
-  {
-    num: "02",
-    title: "Pack & Preview",
-    description: "MaxRects algorithm packs sprites with near-zero waste. Trim transparency, adjust padding, preview animations.",
-    color: "#06B6D4",
-  },
-  {
-    num: "03",
-    title: "Export",
-    description: "One-click export to PixiJS, Phaser, Unity, Godot, or CSS. Copy engine code snippets directly into your project.",
-    color: "#22C55E",
-  },
-];
-
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-20 px-6">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-14">
-          <h2 className="font-[family-name:var(--font-display)] text-3xl md:text-4xl font-bold mb-3">
-            How It Works
-          </h2>
-          <p className="text-[#A0A0A0] max-w-xl mx-auto">
-            From raw sprites to game-ready atlas in three steps.
-          </p>
+    <section id="how-it-works" style={{ padding: "72px 24px", borderBottom: "1px solid var(--border)" }}>
+      <div style={{ maxWidth: "var(--container)", margin: "0 auto" }}>
+        <div style={{ marginBottom: "40px", borderLeft: "2px solid var(--cyan)", paddingLeft: "14px" }}>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, lineHeight: 1, color: "var(--text)", textTransform: "uppercase", letterSpacing: "0.03em" }}>Workflow</div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", marginTop: "6px" }}>Three steps. Zero friction.</div>
         </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {steps.map((s) => (
-            <div key={s.num} className="relative p-6 rounded-xl bg-[#0D0D0D] border border-[#1E1E1E]">
-              <div
-                className="font-[family-name:var(--font-mono)] text-4xl font-bold mb-4 opacity-20"
-                style={{ color: s.color }}
-              >
-                {s.num}
-              </div>
-              <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold mb-2">
-                {s.title}
-              </h3>
-              <p className="text-sm text-[#A0A0A0] leading-relaxed">
-                {s.description}
-              </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1px", background: "var(--border)", border: "1px solid var(--border)" }}>
+          {[
+            { num: "Step 01 — Input", title: "Drop or Generate", desc: "Drag individual sprite frames into the workspace, or describe a character and let AI generate consistent animation frames for you." },
+            { num: "Step 02 — Pack", title: "Auto-Arrange", desc: "MaxRects algorithm packs frames into the tightest possible sheet. Transparent pixels are trimmed, rotations optimized, power-of-two enforced." },
+            { num: "Step 03 — Export", title: "Ship It", desc: "Download the sprite sheet PNG plus engine-specific data files. Copy the loader snippet directly into your Phaser, Unity, or Godot project." },
+          ].map((s) => (
+            <div key={s.num} style={{ background: "var(--bg-panel)", padding: "24px" }}>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--cyan)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.08em" }}>{s.num}</div>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: "14px", fontWeight: 700, marginBottom: "6px", color: "#fff", textTransform: "uppercase", letterSpacing: "0.03em" }}>{s.title}</h3>
+              <p style={{ fontSize: "12px", color: "var(--text-dim)", lineHeight: 1.55 }}>{s.desc}</p>
             </div>
           ))}
         </div>

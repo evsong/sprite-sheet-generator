@@ -4,10 +4,12 @@ import { Features } from "@/components/landing/Features";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Pricing } from "@/components/landing/Pricing";
 import { Footer } from "@/components/landing/Footer";
+import { GridBackground } from "@/components/landing/GridBackground";
 
 export default function Home() {
   return (
     <>
+      <GridBackground />
       <Navbar />
       <main>
         <Hero />
