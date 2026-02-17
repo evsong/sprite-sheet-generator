@@ -128,11 +128,11 @@ export function SpriteList() {
       {/* AI Generate section */}
       <div style={{ padding: "6px 8px", borderBottom: "1px solid var(--border)" }}>
         <h4 style={{ fontFamily: "var(--font-mono)", fontSize: 8, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 5 }}>AI Generate</h4>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1.5">
           <textarea placeholder="Pixel knight, 8 frames, walk cycle..." className="focus:outline-none focus:border-[var(--amber)] focus:shadow-[0_0_0_1px_rgba(245,158,11,0.3),0_0_12px_rgba(245,158,11,0.1)]"
-            style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)", fontFamily: "var(--font-mono)", fontSize: 9, padding: "4px 6px", resize: "none", height: 38 }} />
+            style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)", fontFamily: "var(--font-mono)", fontSize: 9, padding: "6px 8px", resize: "none", height: 56 }} />
           <button onClick={() => setAiModalOpen(true)} className="hover:shadow-[0_0_12px_rgba(245,158,11,0.3)] transition-all duration-200"
-            style={{ height: 20, background: "linear-gradient(135deg, #F59E0B, #F97316)", color: "#000", fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            style={{ height: 26, background: "linear-gradient(135deg, #F59E0B, #F97316)", color: "#000", fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             <svg viewBox="0 0 16 16" width="10" height="10" style={{ verticalAlign: "-1px", marginRight: 3 }}>
               <path d="M8 0l1.5 4.5L14 6l-4.5 1.5L8 12l-1.5-4.5L2 6l4.5-1.5z" fill="#000" opacity="0.7" />
               <path d="M13 10l.75 2.25L16 13l-2.25.75L13 16l-.75-2.25L10 13l2.25-.75z" fill="#000" opacity="0.5" />
