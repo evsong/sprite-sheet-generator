@@ -25,6 +25,7 @@ model User {
   email             String    @unique
   name              String?
   avatar            String?
+  passwordHash      String?
   provider          String?
   tier              Tier      @default(FREE)
   stripeCustomerId  String?   @unique
