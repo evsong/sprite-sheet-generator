@@ -167,12 +167,12 @@ export default function SignInPage() {
             </svg>
             Continue with GitHub
           </button>
-        </div>
 
-        <p className="text-center mt-6" style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)" }}>
-          No account?{" "}
-          <Link href="/auth/signup" className="hover:underline" style={{ color: "var(--cyan)" }}>Create one</Link>
-        </p>
+          <p className="text-center" style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", marginTop: "24px" }}>
+            No account?{" "}
+            <Link href="/auth/signup" className="hover:underline" style={{ color: "var(--cyan)" }}>Create one</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

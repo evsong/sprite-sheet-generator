@@ -188,25 +188,12 @@ export default function SignUpPage() {
               {loading ? "Creating account..." : "Create Account"}
             </button>
           </form>
-        </div>
 
-        <p
-          className="text-center mt-6"
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "12px",
-            color: "var(--text-muted)",
-          }}
-        >
-          Already have an account?{" "}
-          <Link
-            href="/auth/signin"
-            className="hover:underline"
-            style={{ color: "var(--cyan)" }}
-          >
-            Sign in
-          </Link>
-        </p>
+          <p className="text-center" style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", marginTop: "24px" }}>
+            Already have an account?{" "}
+            <Link href="/auth/signin" className="hover:underline" style={{ color: "var(--cyan)" }}>Sign in</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
