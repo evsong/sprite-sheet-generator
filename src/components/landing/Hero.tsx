@@ -218,7 +218,7 @@ export function Hero() {
               { l: 154, t: 73, w: 64, h: 72, bg: "rgba(6,182,212,0.11)", icon: "char" },
               { l: 219, t: 72, w: 26, h: 26, bg: "rgba(8,145,178,0.08)", icon: "shield" },
               { l: 246, t: 50, w: 22, h: 22, bg: "rgba(239,68,68,0.10)", icon: "heart" },
-              { l: 219, t: 99, w: 24, h: 28, bg: "rgba(245,158,11,0.08)", icon: "chest" },
+              { l: 219, t: 99, w: 24, h: 28, bg: "rgba(245,158,11,0.08)", icon: "key" },
               { l: 0, t: 97, w: 64, h: 72, bg: "rgba(8,145,178,0.11)", icon: "char" },
               { l: 65, t: 152, w: 64, h: 68, bg: "rgba(6,182,212,0.11)", icon: "char" },
               { l: 130, t: 146, w: 64, h: 72, bg: "rgba(14,116,144,0.11)", icon: "char" },
@@ -265,11 +265,12 @@ export function Hero() {
                   <path d="M16 28 Q4 18 4 10 Q4 4 10 4 Q14 4 16 8 Q18 4 22 4 Q28 4 28 10 Q28 18 16 28Z" fill="#EF4444" />
                   <path d="M16 24 Q8 16 8 11 Q8 7 12 7 Q14 7 16 10" fill="#FCA5A5" opacity="0.4" />
                 </svg>),
-                chest: (<svg viewBox="0 0 32 32" className="opacity-80" style={{ width: "65%", height: "65%" }}>
-                  <rect x="5" y="10" width="22" height="14" rx="1" fill="#D97706" />
-                  <rect x="5" y="10" width="22" height="6" fill="#F59E0B" />
-                  <rect x="14" y="12" width="5" height="8" rx="1" fill="#FBBF24" />
-                  <rect x="15" y="16" width="3" height="2" fill="#D97706" />
+                key: (<svg viewBox="0 0 32 32" className="opacity-80" style={{ width: "65%", height: "65%" }}>
+                  <circle cx="16" cy="10" r="6" fill="#F59E0B" />
+                  <circle cx="16" cy="10" r="3" fill="#D97706" />
+                  <rect x="14" y="15" width="4" height="14" fill="#FBBF24" />
+                  <rect x="18" y="22" width="4" height="3" fill="#FBBF24" />
+                  <rect x="18" y="26" width="3" height="3" fill="#FBBF24" />
                 </svg>),
               };
               return (
