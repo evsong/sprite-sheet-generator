@@ -64,7 +64,7 @@ export default function SignUpPage() {
       />
 
       <div className="relative w-full max-w-[420px] mx-4">
-        <Link href="/" className="flex items-center justify-center gap-2.5" style={{ marginBottom: "96px" }}>
+        <Link href="/" className="flex items-center justify-center gap-2.5" style={{ marginBottom: "48px" }}>
           <svg viewBox="0 0 20 20" fill="none" width="24" height="24">
             <rect width="20" height="20" fill="#fff" />
             <rect x="4" y="4" width="5" height="5" fill="#000" />
