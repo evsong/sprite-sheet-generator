@@ -142,14 +142,14 @@ export function AiGenerateModal({ open, onClose }: AiGenerateModalProps) {
           <input
             type="range"
             min={1}
-            max={8}
+            max={10}
             value={frameCount}
             onChange={(e) => setFrameCount(Number(e.target.value))}
             className="w-full h-1 accent-[#F59E0B] cursor-pointer"
           />
           <div className="flex justify-between text-[8px] text-[#666] font-[family-name:var(--font-mono)]">
             <span>1</span>
-            <span>8</span>
+            <span>10</span>
           </div>
         </div>
 

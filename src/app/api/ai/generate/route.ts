@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "AI generation not configured" }, { status: 503 });
     }
 
-    const frameCount = Math.min(count || 1, 8);
+    const frameCount = Math.min(count || 1, 10);
 
     // Check auth + quota
     const session = await auth();

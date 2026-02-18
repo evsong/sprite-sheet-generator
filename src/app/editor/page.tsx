@@ -31,7 +31,8 @@ export default function EditorPage() {
     demoLoaded.current = true;
     loadDemoSprites().then((demo) => {
       addSprites(demo);
-      setAnimationFrames(demo.map((s) => s.id));
+      const animFrames = demo.filter((s) => s.isAnimation).map((s) => s.id);
+      setAnimationFrames(animFrames.length ? animFrames : demo.map((s) => s.id));
     });
   }, [sprites.length, addSprites, setAnimationFrames]);
 
