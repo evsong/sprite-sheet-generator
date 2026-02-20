@@ -23,6 +23,9 @@ export function Footer() {
         <span>&copy; 2026 SpriteForge. All rights reserved.</span>
         <span>v1.0.0-beta</span>
       </div>
+      <p style={{ maxWidth: "var(--container)", margin: "8px auto 0", fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-muted)", textAlign: "center" }}>
+        SpriteForge is an independent product and is not affiliated with Google.
+      </p>
     </footer>
   );
 }
