@@ -1,8 +1,8 @@
 export function Footer() {
   return (
     <footer style={{ borderTop: "1px solid var(--border)", padding: "48px 24px 28px", background: "var(--bg-panel)" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1.5fr repeat(3, 1fr)", gap: "32px", maxWidth: "var(--container)", margin: "0 auto" }}>
-        <div>
+      <div className="grid grid-cols-2 md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-8" style={{ maxWidth: "var(--container)", margin: "0 auto" }}>
+        <div className="col-span-2 md:col-span-1">
           <div style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.06em", color: "#fff", marginBottom: "6px", textTransform: "uppercase" }}>SPRITEFORGE</div>
           <p style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5 }}>Production-grade sprite sheet tooling for game developers. Pack, preview, export — all in your browser.</p>
         </div>

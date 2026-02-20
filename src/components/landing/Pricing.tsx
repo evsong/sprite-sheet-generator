@@ -60,7 +60,7 @@ export function Pricing() {
           <div style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, lineHeight: 1, color: "var(--text)", textTransform: "uppercase", letterSpacing: "0.03em" }}>Pricing</div>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", marginTop: "6px" }}>No signup required for free tier.</div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {tiers.map((tier) => (
             <div key={tier.name} style={{ border: "1px solid", borderColor: tier.featured ? "var(--text)" : "var(--border)", background: "var(--bg-panel)" }}>
               <div style={{ padding: "20px", borderBottom: "1px solid var(--border)", background: tier.featured ? "var(--bg-elevated)" : undefined }}>

@@ -6,7 +6,7 @@ export function HowItWorks() {
           <div style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, lineHeight: 1, color: "var(--text)", textTransform: "uppercase", letterSpacing: "0.03em" }}>Workflow</div>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", marginTop: "6px" }}>Three steps. Zero friction.</div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1px", background: "var(--border)", border: "1px solid var(--border)" }}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px" style={{ background: "var(--border)", border: "1px solid var(--border)" }}>
           {[
             { num: "Step 01 — Input", title: "Drop or Generate", desc: "Drag individual sprite frames into the workspace, or describe a character and let AI generate consistent animation frames for you." },
             { num: "Step 02 — Pack", title: "Auto-Arrange", desc: "MaxRects algorithm packs frames into the tightest possible sheet. Transparent pixels are trimmed, rotations optimized, power-of-two enforced." },

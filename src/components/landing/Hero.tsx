@@ -3,16 +3,10 @@ import Image from "next/image";
 
 export function Hero() {
   return (
-    <section style={{ padding: "88px 24px 64px", paddingTop: "calc(var(--nav-h) + 88px)" }}>
+    <section className="px-6 pb-16 pt-[calc(var(--nav-h)+88px)] md:pt-[calc(var(--nav-h)+88px)]">
       <div
-        className="items-center"
-        style={{
-          maxWidth: "var(--container)",
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "1.1fr 1fr",
-          gap: "56px",
-        }}
+        className="flex flex-col md:grid md:grid-cols-[1.1fr_1fr] items-center gap-10 md:gap-14"
+        style={{ maxWidth: "var(--container)", margin: "0 auto" }}
       >
         {/* Left: Text */}
         <div>
@@ -42,9 +36,9 @@ export function Hero() {
           </div>
 
           <h1
+            className="text-[28px] md:text-[44px]"
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "44px",
               fontWeight: 700,
               lineHeight: 0.95,
               marginBottom: "20px",
@@ -147,7 +141,7 @@ export function Hero() {
         </div>
 
         {/* Right: Sprite Preview with Rulers */}
-        <div style={{ border: "1px solid var(--border)", background: "#000" }}>
+        <div className="w-full" style={{ border: "1px solid var(--border)", background: "#000" }}>
           {/* Ruler X */}
           <div
             className="flex overflow-hidden"

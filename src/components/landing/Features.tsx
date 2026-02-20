@@ -46,8 +46,8 @@ export function Features() {
           <div style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, lineHeight: 1, color: "var(--text)", textTransform: "uppercase", letterSpacing: "0.03em" }}>Core Modules</div>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", marginTop: "6px" }}>Essential tools for the modern asset pipeline.</div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1px", background: "var(--border)", border: "1px solid var(--border)" }}>
-          <div style={{ ...cardStyle, gridColumn: "span 2" }}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px" style={{ background: "var(--border)", border: "1px solid var(--border)" }}>
+          <div className="md:col-span-2" style={cardStyle}>
             <span style={numStyle}>01</span>
             <h3 style={h3Style}>Smart Packing</h3>
             <p style={pStyle}>MaxRects bin packing with heuristic selection. Auto-rotation, transparent trimming, and power-of-two alignment for GPU-friendly sheets.</p>
@@ -83,7 +83,7 @@ export function Features() {
               <div className="flex justify-between" style={{ color: "var(--text-muted)" }}><span>Phaser</span><span>.json</span></div>
             </div>
           </div>
-          <div style={{ ...cardStyle, gridColumn: "span 2" }}>
+          <div className="md:col-span-2" style={cardStyle}>
             <span style={numStyle}>05</span>
             <h3 style={h3Style}>Engine Code Snippets</h3>
             <p style={pStyle}>One-click copy of loader code for your engine. Paste directly into your project — no manual wiring.</p>

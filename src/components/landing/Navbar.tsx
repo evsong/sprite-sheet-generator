@@ -1,11 +1,16 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { UserMenu } from "@/components/auth/UserMenu";
 
 export function Navbar() {
   const pathname = usePathname();
   const isEditor = pathname?.startsWith("/editor");
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const links = ["Product", "Editor", "Features", "Pricing"];
+
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm"
@@ -40,8 +45,9 @@ export function Navbar() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-5">
-          {["Product", "Editor", "Features", "Pricing"].map((label) => (
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-5">
+          {links.map((label) => (
             <a
               key={label}
               href={label === "Editor" ? "/editor" : `#${label.toLowerCase()}`}
@@ -78,7 +84,61 @@ export function Navbar() {
             Launch Editor
           </Link>
         </div>
+
+        {/* Mobile hamburger */}
+        <button
+          className="md:hidden flex flex-col justify-center gap-1 p-2"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          <span className="block w-4 h-px bg-white transition-transform" style={menuOpen ? { transform: "rotate(45deg) translate(2px, 2px)" } : {}} />
+          <span className="block w-4 h-px bg-white transition-opacity" style={{ opacity: menuOpen ? 0 : 1 }} />
+          <span className="block w-4 h-px bg-white transition-transform" style={menuOpen ? { transform: "rotate(-45deg) translate(2px, -2px)" } : {}} />
+        </button>
       </div>
+
+      {/* Mobile dropdown */}
+      {menuOpen && (
+        <div
+          className="md:hidden flex flex-col gap-4 px-6 py-4"
+          style={{ background: "rgba(5,5,5,0.96)", borderBottom: "1px solid var(--border)" }}
+        >
+          {links.map((label) => (
+            <a
+              key={label}
+              href={label === "Editor" ? "/editor" : `#${label.toLowerCase()}`}
+              onClick={() => setMenuOpen(false)}
+              style={{
+                fontSize: "12px",
+                fontWeight: 500,
+                color: "var(--text-muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              {label}
+            </a>
+          ))}
+          <Link
+            href="/editor"
+            onClick={() => setMenuOpen(false)}
+            className="inline-flex items-center justify-center"
+            style={{
+              height: "30px",
+              fontSize: "11px",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              borderRadius: "2px",
+              background: "var(--text)",
+              color: "#000",
+              border: "1px solid var(--text)",
+            }}
+          >
+            Launch Editor
+          </Link>
+        </div>
+      )}
     </nav>
   );
 }
