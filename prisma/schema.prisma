@@ -30,9 +30,11 @@ model User {
   passwordHash      String?
   provider          String?
   tier              Tier      @default(FREE)
-  stripeCustomerId  String?   @unique
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  stripeCustomerId    String?   @unique
+  passwordResetToken  String?   @unique
+  passwordResetExpires DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   projects      Project[]
   aiUsage       AiUsage[]

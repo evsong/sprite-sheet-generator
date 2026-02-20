@@ -128,6 +128,7 @@ export default function SignInPage() {
                 style={{ height: "42px", background: "#fff", color: "#000", border: "1px solid #fff", fontSize: "12px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", transition: "all 0.12s", marginTop: "4px" }}>
                 {loading ? "Signing in..." : "Sign In"}
               </button>
+              <Link href="/auth/reset-password" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-muted)", textAlign: "center" }}>Forgot password?</Link>
             </form>
           ) : (
             <form onSubmit={handleMagicLink} className="flex flex-col gap-4">

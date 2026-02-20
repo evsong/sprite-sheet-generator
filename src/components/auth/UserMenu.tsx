@@ -60,6 +60,14 @@ export function UserMenu() {
               <p className="text-[11px] text-white truncate">{session.user.name}</p>
               <p className="text-[9px] text-[#666] font-[family-name:var(--font-mono)] truncate">{session.user.email}</p>
             </div>
+            <Link href="/settings" onClick={() => setOpen(false)}
+              className="block w-full text-left px-3 py-2 text-[11px] text-[#A0A0A0] hover:text-white hover:bg-[#1A1A1A] transition-colors duration-100 font-[family-name:var(--font-mono)]">
+              Settings
+            </Link>
+            <Link href="/settings" onClick={() => setOpen(false)}
+              className="block w-full text-left px-3 py-2 text-[11px] text-[#A0A0A0] hover:text-white hover:bg-[#1A1A1A] transition-colors duration-100 font-[family-name:var(--font-mono)] border-b border-[#1E1E1E]">
+              Billing
+            </Link>
             <button
               onClick={() => { signOut({ callbackUrl: "/" }); setOpen(false); }}
               className="w-full text-left px-3 py-2 text-[11px] text-[#A0A0A0] hover:text-white hover:bg-[#1A1A1A] transition-colors duration-100 cursor-pointer font-[family-name:var(--font-mono)]"

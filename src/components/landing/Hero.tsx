@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export function Hero() {
   return (
-    <section className="px-6 pb-16 pt-[calc(var(--nav-h)+88px)] md:pt-[calc(var(--nav-h)+88px)]">
+    <section className="px-6 pb-16" style={{ paddingTop: "calc(var(--nav-h) + 32px)" }}>
       <div
         className="flex flex-col md:grid md:grid-cols-[1.1fr_1fr] items-center gap-10 md:gap-14"
         style={{ maxWidth: "var(--container)", margin: "0 auto" }}
