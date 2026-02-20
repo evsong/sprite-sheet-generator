@@ -48,12 +48,16 @@ export interface AnimationState {
   onionSkin: boolean;
 }
 
+export type AiStage = "generating" | "splitting" | "removing-bg" | "done";
+
 export interface AiProgress {
   active: boolean;
   total: number;
   completed: number;
   prompt: string;
   error?: string;
+  stage?: AiStage;
+  stageLabel?: string;
 }
 
 interface EditorState {

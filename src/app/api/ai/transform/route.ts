@@ -4,42 +4,40 @@ import { checkQuota, recordUsage } from "@/lib/ai-quota";
 
 type Action = "variants" | "recolor" | "upscale" | "extend-frames";
 
-const API_URL = process.env.GEMINI_FREE_API_URL || "https://gemini-api.inspiredjinyao.com";
-const API_KEY = process.env.GEMINI_FREE_API_KEY;
+const PROXY_URL = process.env.GEMINI_PROXY_URL || "https://code.newcli.com/gemini";
+const PROXY_TOKEN = process.env.GEMINI_PROXY_TOKEN;
 
 async function geminiImageToImage(imageBase64: string, prompt: string): Promise<string | null> {
-  const res = await fetch(`${API_URL}/v1/chat/completions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gemini-3-pro-image",
-      messages: [{
-        role: "user",
-        content: [
-          { type: "image_url", image_url: { url: `data:image/png;base64,${imageBase64}` } },
-          { type: "text", text: prompt },
-        ],
-      }],
-    }),
-  });
+  const res = await fetch(
+    `${PROXY_URL}/v1beta/models/gemini-3-pro-image:generateContent`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${PROXY_TOKEN}`,
+        "Content-Type": "application/json",
+        "User-Agent": "SpriteForge/1.0",
+      },
+      body: JSON.stringify({
+        contents: [{
+          role: "user",
+          parts: [
+            { inlineData: { mimeType: "image/png", data: imageBase64 } },
+            { text: prompt },
+          ],
+        }],
+        generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+      }),
+    }
+  );
 
   if (!res.ok) throw new Error(await res.text());
 
   const json = await res.json();
-  const text = json.choices?.[0]?.message?.content || "";
+  const parts = json.candidates?.[0]?.content?.parts;
+  const imagePart = parts?.find((p: { inlineData?: unknown }) => p.inlineData);
+  if (!imagePart?.inlineData) return null;
 
-  // Extract image URL from markdown ![...](...) in response
-  const match = text.match(/!\[.*?\]\((.*?)\)/);
-  if (!match) return null;
-
-  // Fetch the proxy image and convert to base64
-  const imgRes = await fetch(match[1]);
-  if (!imgRes.ok) return null;
-  const buf = await imgRes.arrayBuffer();
-  return Buffer.from(buf).toString("base64");
+  return imagePart.inlineData.data;
 }
 
 export async function POST(req: NextRequest) {
@@ -55,7 +53,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "action and imageBase64 required" }, { status: 400 });
     }
 
-    if (!API_KEY) {
+    if (!PROXY_TOKEN) {
       return NextResponse.json({ error: "AI not configured" }, { status: 503 });
     }
 
