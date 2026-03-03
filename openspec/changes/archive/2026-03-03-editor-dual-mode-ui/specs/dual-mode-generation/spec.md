@@ -1,4 +1,4 @@
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: SpriteItem carries generation mode
 Each SpriteItem SHALL have an optional `mode` field of type `"sequence" | "atlas"`. When `mode` is absent, it SHALL be treated as `"sequence"` for all filtering and display purposes.
