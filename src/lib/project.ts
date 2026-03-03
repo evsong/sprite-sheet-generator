@@ -1,4 +1,5 @@
 import type { SpriteItem, PackingConfig, AnimationState } from "@/stores/editor-store";
+import type { GenerationMode } from "./prompt-templates";
 
 interface SpriteForgeProject {
   version: 1;
@@ -12,6 +13,7 @@ interface SpriteForgeProject {
     height: number;
     isAi: boolean;
     dataUrl: string; // base64 PNG
+    mode?: GenerationMode;
   }[];
 }
 
@@ -47,6 +49,7 @@ export function exportProject(
       height: s.height,
       isAi: s.isAi,
       dataUrl: spriteToDataUrl(s),
+      mode: s.mode,
     })),
   };
 
@@ -92,6 +95,7 @@ export async function importProject(file: File): Promise<{
         height: s.height,
         trimmed: false,
         isAi: s.isAi,
+        mode: s.mode,
       };
     })
   );

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { GenerationMode } from "@/lib/prompt-templates";
 
 export interface SpriteItem {
   id: string;
@@ -11,6 +12,7 @@ export interface SpriteItem {
   trimRect?: { x: number; y: number; w: number; h: number };
   sourceSize?: { w: number; h: number };
   isAi: boolean;
+  mode?: GenerationMode;
 }
 
 export interface PackedRect {
@@ -60,6 +62,8 @@ export interface AiProgress {
   stageLabel?: string;
 }
 
+export type EditorTab = "frames" | "assets";
+
 interface EditorState {
   sprites: SpriteItem[];
   bins: PackedBin[];
@@ -69,6 +73,7 @@ interface EditorState {
   animation: AnimationState;
   zoom: number;
   aiProgress: AiProgress | null;
+  activeTab: EditorTab;
 
   // Sprite actions
   addSprites: (sprites: SpriteItem[]) => void;
@@ -99,6 +104,7 @@ interface EditorState {
   aiModalOpen: boolean;
   setAiModalOpen: (open: boolean) => void;
   setAiProgress: (progress: AiProgress | null) => void;
+  setActiveTab: (tab: EditorTab) => void;
 
   // Project
   loadProject: (data: { sprites: SpriteItem[]; packingConfig: PackingConfig; animation: Partial<AnimationState> }) => void;
@@ -133,6 +139,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   zoom: 1,
   aiModalOpen: false,
   aiProgress: null,
+  activeTab: "frames",
 
   addSprites: (newSprites) =>
     set((s) => ({ sprites: [...s.sprites, ...newSprites] })),
@@ -194,6 +201,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   setZoom: (zoom) => set({ zoom }),
   setAiModalOpen: (open) => set({ aiModalOpen: open }),
   setAiProgress: (progress) => set({ aiProgress: progress }),
+  setActiveTab: (tab) => set({ activeTab: tab }),
   loadProject: (data) =>
     set({
       sprites: data.sprites,

@@ -11,8 +11,14 @@ export function EditorToolbar() {
   const animation = useEditorStore((s) => s.animation);
   const clearSprites = useEditorStore((s) => s.clearSprites);
   const loadProjectAction = useEditorStore((s) => s.loadProject);
+  const activeTab = useEditorStore((s) => s.activeTab);
   const openFileRef = useRef<HTMLInputElement>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
+
+  const isAssets = activeTab === "assets";
+  const filteredCount = sprites.filter((s) =>
+    isAssets ? s.mode === "atlas" : s.mode !== "atlas"
+  ).length;
 
   const stats = useMemo(() => {
     const bin = bins[activeBin];
@@ -86,7 +92,7 @@ export function EditorToolbar() {
       {/* Right: stats + export + save */}
       <div className="flex items-center gap-1.5">
         <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-muted)" }}>
-          {sprites.length} sprites{stats ? ` · ${stats.width}×${stats.height} · ${stats.density.toFixed(1)}%` : ""}
+          {filteredCount} {isAssets ? "assets" : "frames"}{stats ? ` · ${stats.width}×${stats.height} · ${stats.density.toFixed(1)}%` : ""}
         </span>
         <div className="relative">
           <button

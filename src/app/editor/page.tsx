@@ -5,6 +5,7 @@ import { SpriteList } from "@/components/editor/SpriteList";
 import { EditorCanvas } from "@/components/editor/EditorCanvas";
 import { SettingsPanel } from "@/components/editor/SettingsPanel";
 import { AnimationTimeline } from "@/components/editor/AnimationTimeline";
+import { AssetGrid } from "@/components/editor/AssetGrid";
 import { AiGenerateModal } from "@/components/editor/AiGenerateModal";
 import { AiProgressToast } from "@/components/editor/AiProgressToast";
 import { useAutoPack } from "@/hooks/use-auto-pack";
@@ -22,6 +23,7 @@ export default function EditorPage() {
 
   const aiModalOpen = useEditorStore((s) => s.aiModalOpen);
   const setAiModalOpen = useEditorStore((s) => s.setAiModalOpen);
+  const activeTab = useEditorStore((s) => s.activeTab);
   const sprites = useEditorStore((s) => s.sprites);
   const addSprites = useEditorStore((s) => s.addSprites);
   const setAnimationFrames = useEditorStore((s) => s.setAnimationFrames);
@@ -80,9 +82,9 @@ export default function EditorPage() {
         <SpriteList />
         <EditorCanvas />
         <SettingsPanel />
-        <AnimationTimeline />
+        {activeTab === "frames" ? <AnimationTimeline /> : <AssetGrid />}
       </div>
-      <AiGenerateModal open={aiModalOpen} onClose={() => setAiModalOpen(false)} />
+      <AiGenerateModal open={aiModalOpen} onClose={() => setAiModalOpen(false)} defaultMode={activeTab === "assets" ? "atlas" : "sequence"} />
       <AiProgressToast />
     </div>
   );

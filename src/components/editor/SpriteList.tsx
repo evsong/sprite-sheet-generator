@@ -41,21 +41,30 @@ export function SpriteList() {
   const setAnimationFrames = useEditorStore((s) => s.setAnimationFrames);
   const updateSprite = useEditorStore((s) => s.updateSprite);
   const setAiModalOpen = useEditorStore((s) => s.setAiModalOpen);
+  const activeTab = useEditorStore((s) => s.activeTab);
+  const setActiveTab = useEditorStore((s) => s.setActiveTab);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; spriteId: string } | null>(null);
   const [processingBg, setProcessingBg] = useState<string | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
+  const isAssets = activeTab === "assets";
+  const filteredSprites = sprites.filter((s) =>
+    isAssets ? s.mode === "atlas" : s.mode !== "atlas"
+  );
+
   const handleFileUpload = useCallback((files: FileList) => {
     const imageFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
     if (imageFiles.length === 0) return;
+    const currentTab = useEditorStore.getState().activeTab;
+    const importMode = currentTab === "assets" ? "atlas" as const : "sequence" as const;
     const newSprites: SpriteItem[] = [];
     let loaded = 0;
     imageFiles.forEach((file) => {
       const img = new Image();
       img.onload = () => {
-        newSprites.push({ id: crypto.randomUUID(), name: file.name.replace(/\.[^.]+$/, ""), file, image: img, width: img.naturalWidth, height: img.naturalHeight, trimmed: false, isAi: false });
+        newSprites.push({ id: crypto.randomUUID(), name: file.name.replace(/\.[^.]+$/, ""), file, image: img, width: img.naturalWidth, height: img.naturalHeight, trimmed: false, isAi: false, mode: importMode });
         loaded++;
         if (loaded === imageFiles.length) addSprites(newSprites);
       };
@@ -110,6 +119,24 @@ export function SpriteList() {
 
   return (
     <div className="flex flex-col overflow-y-auto" style={{ background: "var(--bg-panel)", borderRight: "1px solid var(--border)" }}>
+      {/* Tab switcher */}
+      <div style={{ padding: "6px 8px", borderBottom: "1px solid var(--border)" }}>
+        <div className="flex gap-1 p-0.5 bg-[#1A1A1A] rounded-lg border border-[#1E1E1E]">
+          {([["frames", "Frames"], ["assets", "Assets"]] as const).map(([tab, label]) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 py-1.5 text-[10px] font-[family-name:var(--font-mono)] rounded-md cursor-pointer transition-colors ${
+                activeTab === tab
+                  ? "bg-[#F59E0B]/20 text-[#F59E0B]"
+                  : "text-[#666] hover:text-[#A0A0A0]"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
       {/* Import section */}
       <div style={{ padding: "6px 8px", borderBottom: "1px solid var(--border)" }}>
         <h4 style={{ fontFamily: "var(--font-mono)", fontSize: 8, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 5 }}>Import</h4>
@@ -120,7 +147,7 @@ export function SpriteList() {
           className="cursor-pointer hover:border-[var(--cyan)] transition-colors"
           style={{ border: "1px dashed var(--border)", padding: "10px 6px", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-muted)" }}
         >
-          Drop PNG / JPG frames<br />or click to browse
+          {isAssets ? "Drop PNG / JPG assets" : "Drop PNG / JPG frames"}<br />or click to browse
         </div>
         <input ref={fileInputRef} type="file" multiple accept="image/png,image/webp,image/gif,image/jpeg" className="hidden"
           onChange={(e) => e.target.files && handleFileUpload(e.target.files)} />
@@ -129,7 +156,7 @@ export function SpriteList() {
       <div style={{ padding: "6px 8px", borderBottom: "1px solid var(--border)" }}>
         <h4 style={{ fontFamily: "var(--font-mono)", fontSize: 8, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 5 }}>AI Generate</h4>
         <div className="flex flex-col gap-1.5">
-          <textarea placeholder="Pixel knight, 8 frames, walk cycle..." className="focus:outline-none focus:border-[var(--amber)] focus:shadow-[0_0_0_1px_rgba(245,158,11,0.3),0_0_12px_rgba(245,158,11,0.1)]"
+          <textarea placeholder={isAssets ? "Potion set, 4 items, pixel art..." : "Pixel knight, 8 frames, walk cycle..."} className="focus:outline-none focus:border-[var(--amber)] focus:shadow-[0_0_0_1px_rgba(245,158,11,0.3),0_0_12px_rgba(245,158,11,0.1)]"
             style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)", fontFamily: "var(--font-mono)", fontSize: 9, padding: "6px 8px", resize: "none", height: 56 }} />
           <button onClick={() => setAiModalOpen(true)} className="hover:shadow-[0_0_12px_rgba(245,158,11,0.3)] transition-all duration-200 flex items-center justify-center w-full"
             style={{ height: 26, background: "linear-gradient(135deg, #F59E0B, #F97316)", color: "#000", fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
@@ -144,10 +171,10 @@ export function SpriteList() {
       {/* Sprites list */}
       <div style={{ padding: "6px 8px", flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         <h4 style={{ fontFamily: "var(--font-mono)", fontSize: 8, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 5 }}>
-          Sprites ({sprites.length})
+          {isAssets ? `Assets (${filteredSprites.length})` : `Frames (${filteredSprites.length})`}
         </h4>
         <div className="flex flex-col gap-px flex-1 overflow-y-auto">
-          {sprites.map((sprite, index) => (
+          {filteredSprites.map((sprite, index) => (
             <div key={sprite.id} draggable
               onDragStart={(e) => { setDragIndex(index); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", ""); }}
               onDragOver={(e) => { if (dragIndex === null) return; e.preventDefault(); setDragOverIndex(index); }}
@@ -172,7 +199,10 @@ export function SpriteList() {
         </div>
       </div>
       {/* Context menu */}
-      {contextMenu && (
+      {contextMenu && (() => {
+        const ctxSprite = sprites.find((s) => s.id === contextMenu.spriteId);
+        const isAtlasSprite = ctxSprite?.mode === "atlas";
+        return (
         <>
           <div className="fixed inset-0 z-[199]" onClick={() => setContextMenu(null)} />
           <div className="fixed z-[200] py-0.5" style={{ left: contextMenu.x, top: contextMenu.y, minWidth: 160, background: "var(--bg-panel)", border: "1px solid var(--border)", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.5), 0 12px 32px rgba(0,0,0,0.6)" }}>
@@ -184,12 +214,17 @@ export function SpriteList() {
             <CtxItem icon="recolor" label="AI Recolor" shortcut="⌘⇧C" ai onClick={() => { handleAiAction(contextMenu.spriteId, "recolor"); setContextMenu(null); }} />
             <CtxItem icon="upscale" label="AI Upscale 2×" shortcut="⌘⇧U" ai onClick={() => { handleAiAction(contextMenu.spriteId, "upscale"); setContextMenu(null); }} />
             <CtxItem icon="rmbg" label={processingBg ? "Removing BG..." : "AI Remove BG"} ai onClick={() => { handleRemoveBg(contextMenu.spriteId); setContextMenu(null); }} />
-            <div style={{ height: 1, background: "var(--border)", margin: "3px 0" }} />
-            <CtxItem icon="anim" label="Add to Animation" onClick={() => { addToAnimation(contextMenu.spriteId); setContextMenu(null); }} />
-            <CtxItem icon="extend" label="AI Extend Frames" shortcut="⌘⇧E" ai onClick={() => { handleAiAction(contextMenu.spriteId, "extend-frames"); setContextMenu(null); }} />
+            {!isAtlasSprite && (
+              <>
+                <div style={{ height: 1, background: "var(--border)", margin: "3px 0" }} />
+                <CtxItem icon="anim" label="Add to Animation" onClick={() => { addToAnimation(contextMenu.spriteId); setContextMenu(null); }} />
+                <CtxItem icon="extend" label="AI Extend Frames" shortcut="⌘⇧E" ai onClick={() => { handleAiAction(contextMenu.spriteId, "extend-frames"); setContextMenu(null); }} />
+              </>
+            )}
           </div>
         </>
-      )}
+        );
+      })()}
     </div>
   );
 }

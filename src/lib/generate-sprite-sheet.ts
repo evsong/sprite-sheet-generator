@@ -68,6 +68,7 @@ export async function generateSpriteSheet(opts: GenerateOptions): Promise<Sprite
       height: resized.naturalHeight,
       trimmed: false,
       isAi: true,
+      mode,
     });
   }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEditorStore } from "@/stores/editor-store";
 import { PROMPT_TEMPLATES, type GenerationMode } from "@/lib/prompt-templates";
 import { generateSpriteSheet } from "@/lib/generate-sprite-sheet";
@@ -16,16 +16,21 @@ const SIZES = [32, 64, 128, 256] as const;
 interface AiGenerateModalProps {
   open: boolean;
   onClose: () => void;
+  defaultMode?: GenerationMode;
 }
 
-export function AiGenerateModal({ open, onClose }: AiGenerateModalProps) {
+export function AiGenerateModal({ open, onClose, defaultMode }: AiGenerateModalProps) {
   const [prompt, setPrompt] = useState("");
   const [style, setStyle] = useState("Pixel Art");
   const [frameCount, setFrameCount] = useState(4);
   const [targetSize, setTargetSize] = useState<number>(64);
-  const [mode, setMode] = useState<GenerationMode>("sequence");
+  const [mode, setMode] = useState<GenerationMode>(defaultMode ?? "sequence");
   const [showHistory, setShowHistory] = useState(false);
   const [history] = useState<HistoryEntry[]>(() => loadHistory());
+
+  useEffect(() => {
+    if (open && defaultMode) setMode(defaultMode);
+  }, [open, defaultMode]);
 
   if (!open) return null;
 
