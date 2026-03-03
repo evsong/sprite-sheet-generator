@@ -1,12 +1,14 @@
 import { splitSpriteSheet } from "./sprite-sheet-splitter";
 import { processFrames } from "./bg-removal";
 import type { SpriteItem, AiProgress } from "@/stores/editor-store";
+import type { GenerationMode } from "./prompt-templates";
 
 export interface GenerateOptions {
   prompt: string;
   style: string;
   frameCount: number;
   targetSize: number;
+  mode?: GenerationMode;
   onProgress: (progress: Partial<AiProgress>) => void;
 }
 
@@ -25,7 +27,7 @@ function resizeFrame(img: HTMLImageElement, size: number): Promise<HTMLImageElem
 }
 
 export async function generateSpriteSheet(opts: GenerateOptions): Promise<SpriteItem[]> {
-  const { prompt, style, frameCount, targetSize, onProgress } = opts;
+  const { prompt, style, frameCount, targetSize, mode = "sequence", onProgress } = opts;
 
   // Stage 1: API call
   onProgress({ active: true, stage: "generating", stageLabel: "生成中...", completed: 0, total: frameCount, prompt });
@@ -33,7 +35,7 @@ export async function generateSpriteSheet(opts: GenerateOptions): Promise<Sprite
   const res = await fetch("/api/ai/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, style, count: frameCount }),
+    body: JSON.stringify({ prompt, style, count: frameCount, mode }),
   });
 
   if (!res.ok) {
@@ -59,7 +61,7 @@ export async function generateSpriteSheet(opts: GenerateOptions): Promise<Sprite
     const resized = targetSize > 0 ? await resizeFrame(cleanFrames[i], targetSize) : cleanFrames[i];
     sprites.push({
       id: `ai-${Date.now()}-${i}`,
-      name: `frame-${i + 1}`,
+      name: `${mode === "atlas" ? "item" : "frame"}-${i + 1}`,
       file: null,
       image: resized,
       width: resized.naturalWidth,

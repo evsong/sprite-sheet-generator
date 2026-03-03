@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { checkQuota, recordUsage } from "@/lib/ai-quota";
-import { buildSystemPrompt, getOptimalGrid } from "@/lib/prompt-templates";
+import { buildSystemPrompt, getOptimalGrid, type GenerationMode } from "@/lib/prompt-templates";
 
 const PROXY_URL = process.env.GEMINI_PROXY_URL || "https://code.newcli.com/gemini";
 const PROXY_TOKEN = process.env.GEMINI_PROXY_TOKEN;
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, style, count } = await req.json();
+    const { prompt, style, count, itemCount, mode: rawMode } = await req.json();
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "AI generation not configured" }, { status: 503 });
     }
 
-    const frameCount = Math.min(count || 1, 10);
+    const frameCount = Math.min(count ?? itemCount ?? 1, 10);
+    const mode: GenerationMode = rawMode === "atlas" ? "atlas" : "sequence";
 
     // Auth + quota
     const session = await auth();
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const systemPrompt = buildSystemPrompt(prompt, frameCount, style || "pixel art");
+    const systemPrompt = buildSystemPrompt(prompt, frameCount, style || "pixel art", mode);
     const { rows, cols } = getOptimalGrid(frameCount);
 
     const res = await fetch(
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
         headers: {
           Authorization: `Bearer ${PROXY_TOKEN}`,
           "Content-Type": "application/json",
-          "User-Agent": "SpriteForge/1.0",
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
         },
         body: JSON.stringify({
           contents: [{ role: "user", parts: [{ text: systemPrompt }] }],
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
       await recordUsage(userId, 1);
     }
 
-    return NextResponse.json({ spriteSheet, frameCount, gridCols: cols, gridRows: rows });
+    return NextResponse.json({ spriteSheet, frameCount, gridCols: cols, gridRows: rows, mode });
   } catch (e) {
     console.error("AI generation error:", e);
     return NextResponse.json({ error: "Generation failed" }, { status: 500 });

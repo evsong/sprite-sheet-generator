@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useEditorStore } from "@/stores/editor-store";
-import { PROMPT_TEMPLATES } from "@/lib/prompt-templates";
+import { PROMPT_TEMPLATES, type GenerationMode } from "@/lib/prompt-templates";
 import { generateSpriteSheet } from "@/lib/generate-sprite-sheet";
 import { loadHistory, type HistoryEntry } from "@/lib/generation-history";
 
@@ -23,16 +23,22 @@ export function AiGenerateModal({ open, onClose }: AiGenerateModalProps) {
   const [style, setStyle] = useState("Pixel Art");
   const [frameCount, setFrameCount] = useState(4);
   const [targetSize, setTargetSize] = useState<number>(64);
+  const [mode, setMode] = useState<GenerationMode>("sequence");
   const [showHistory, setShowHistory] = useState(false);
   const [history] = useState<HistoryEntry[]>(() => loadHistory());
 
   if (!open) return null;
+
+  const filteredTemplates = PROMPT_TEMPLATES.filter((t) => t.mode === mode);
+  const isAtlas = mode === "atlas";
+  const countLabel = isAtlas ? "Items" : "Frames";
 
   const handleTemplate = (id: string) => {
     const t = PROMPT_TEMPLATES.find((p) => p.id === id);
     if (!t) return;
     setPrompt(t.prompt);
     setFrameCount(t.defaultFrames);
+    setMode(t.mode);
   };
 
   const handleReuse = (entry: HistoryEntry) => {
@@ -40,6 +46,7 @@ export function AiGenerateModal({ open, onClose }: AiGenerateModalProps) {
     setStyle(entry.style);
     setFrameCount(entry.frameCount);
     setTargetSize(entry.targetSize);
+    setMode(entry.mode ?? "sequence");
   };
 
   const handleGenerate = async () => {
@@ -53,6 +60,7 @@ export function AiGenerateModal({ open, onClose }: AiGenerateModalProps) {
         style,
         frameCount,
         targetSize,
+        mode,
         onProgress: (p) => {
           const current = useEditorStore.getState().aiProgress;
           setAiProgress({ ...current, active: true, total: frameCount, completed: 0, prompt: prompt.trim(), ...p });
@@ -60,11 +68,13 @@ export function AiGenerateModal({ open, onClose }: AiGenerateModalProps) {
       });
 
       addSprites(sprites);
-      setAnimationFrames(sprites.map((s) => s.id));
+      if (mode === "sequence") {
+        setAnimationFrames(sprites.map((s) => s.id));
+      }
 
       // Save to history
       const { saveHistory } = await import("@/lib/generation-history");
-      saveHistory({ prompt: prompt.trim(), style, frameCount, targetSize, timestamp: Date.now() });
+      saveHistory({ prompt: prompt.trim(), style, frameCount, targetSize, mode, timestamp: Date.now() });
     } catch (err) {
       setAiProgress({
         active: true, total: frameCount, completed: 0, prompt: prompt.trim(),
@@ -92,13 +102,30 @@ export function AiGenerateModal({ open, onClose }: AiGenerateModalProps) {
           </button>
         </div>
 
+        {/* Mode toggle */}
+        <div className="flex gap-1 mb-3 p-0.5 bg-[#1A1A1A] rounded-lg border border-[#1E1E1E]">
+          {([["sequence", "Animation"], ["atlas", "Icon Set"]] as const).map(([m, label]) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={`flex-1 py-1.5 text-[10px] font-[family-name:var(--font-mono)] rounded-md cursor-pointer transition-colors ${
+                mode === m
+                  ? "bg-[#F59E0B]/20 text-[#F59E0B]"
+                  : "text-[#666] hover:text-[#A0A0A0]"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         {/* Template cards */}
         <div className="mb-3">
           <label className="font-[family-name:var(--font-mono)] text-[9px] text-[#666] uppercase tracking-wider block mb-1.5">
             Templates
           </label>
           <div className="grid grid-cols-4 gap-1.5">
-            {PROMPT_TEMPLATES.map((t) => (
+            {filteredTemplates.map((t) => (
               <button
                 key={t.id}
                 onClick={() => handleTemplate(t.id)}
@@ -114,12 +141,12 @@ export function AiGenerateModal({ open, onClose }: AiGenerateModalProps) {
         {/* Prompt */}
         <div className="mb-3">
           <label className="font-[family-name:var(--font-mono)] text-[9px] text-[#666] uppercase tracking-wider block mb-1">
-            Describe your sprite
+            {isAtlas ? "Describe your icon set" : "Describe your sprite"}
           </label>
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="e.g. a warrior character walking animation"
+            placeholder={isAtlas ? "e.g. a set of medieval weapons" : "e.g. a warrior character walking animation"}
             rows={3}
             className="w-full bg-[#1A1A1A] border border-[#1E1E1E] rounded-lg px-3 py-2 text-[12px] text-white placeholder-[#333] focus:border-[#F59E0B] focus:outline-none resize-none font-[family-name:var(--font-body)]"
           />
@@ -169,10 +196,10 @@ export function AiGenerateModal({ open, onClose }: AiGenerateModalProps) {
           </div>
         </div>
 
-        {/* Frame count */}
+        {/* Frame/Item count */}
         <div className="mb-4">
           <label className="font-[family-name:var(--font-mono)] text-[9px] text-[#666] uppercase tracking-wider block mb-1">
-            Frames ({frameCount})
+            {countLabel} ({frameCount})
           </label>
           <input
             type="range"
@@ -209,7 +236,7 @@ export function AiGenerateModal({ open, onClose }: AiGenerateModalProps) {
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] text-[#999] font-[family-name:var(--font-mono)] truncate">{h.prompt}</p>
                       <p className="text-[8px] text-[#555] font-[family-name:var(--font-mono)]">
-                        {h.frameCount}f · {h.style} · {new Date(h.timestamp).toLocaleDateString()}
+                        {h.frameCount}{isAtlas ? "i" : "f"} · {h.style} · {h.mode === "atlas" ? "Atlas" : "Seq"} · {new Date(h.timestamp).toLocaleDateString()}
                       </p>
                     </div>
                     <button
@@ -231,7 +258,7 @@ export function AiGenerateModal({ open, onClose }: AiGenerateModalProps) {
           disabled={!prompt.trim()}
           className="w-full py-2.5 text-[12px] font-semibold text-black bg-[#F59E0B] rounded-lg hover:brightness-110 transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {`Generate ${frameCount > 1 ? `${frameCount} Frames` : "Sprite"} (${targetSize}px)`}
+          {`Generate ${frameCount > 1 ? `${frameCount} ${countLabel}` : isAtlas ? "Item" : "Sprite"} (${targetSize}px)`}
         </button>
       </div>
     </>

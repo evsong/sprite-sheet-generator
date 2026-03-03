@@ -1,3 +1,5 @@
+import type { GenerationMode } from "./prompt-templates";
+
 const STORAGE_KEY = "spriteforge-gen-history";
 const MAX_ENTRIES = 10;
 
@@ -8,12 +10,15 @@ export interface HistoryEntry {
   targetSize: number;
   thumbnail?: string;
   timestamp: number;
+  mode?: GenerationMode;
 }
 
 export function loadHistory(): HistoryEntry[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const entries: HistoryEntry[] = JSON.parse(raw);
+    return entries.map((e) => ({ ...e, mode: e.mode ?? "sequence" }));
   } catch {
     return [];
   }
