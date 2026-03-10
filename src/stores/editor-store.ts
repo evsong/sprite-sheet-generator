@@ -65,6 +65,19 @@ export interface AiProgress {
 
 export type EditorTab = "frames" | "assets";
 
+export type EngineSyncStatus = "disconnected" | "connecting" | "connected";
+
+export interface EngineSyncState {
+  connected: boolean;
+  status: EngineSyncStatus;
+  port: number;
+  autoSync: boolean;
+  sessionToken: string;
+  lastPushAt: number | null;
+  engineName?: string;
+  mixedContentWarning?: boolean;
+}
+
 interface EditorState {
   sprites: SpriteItem[];
   bins: PackedBin[];
@@ -114,6 +127,10 @@ interface EditorState {
 
   // Zoom
   setZoom: (zoom: number) => void;
+
+  // Engine Sync
+  engineSync: EngineSyncState;
+  updateEngineSync: (updates: Partial<EngineSyncState>) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -144,6 +161,14 @@ export const useEditorStore = create<EditorState>((set) => ({
   aiProgress: null,
   activeTab: "frames",
   lastAiParams: null,
+  engineSync: {
+    connected: false,
+    status: "disconnected",
+    port: 47405,
+    autoSync: false,
+    sessionToken: typeof crypto !== "undefined" ? crypto.randomUUID() : "default",
+    lastPushAt: null,
+  },
 
   addSprites: (newSprites) =>
     set((s) => ({ sprites: [...s.sprites, ...newSprites] })),
@@ -203,6 +228,8 @@ export const useEditorStore = create<EditorState>((set) => ({
     set((s) => ({ animation: { ...s.animation, onionSkin: !s.animation.onionSkin } })),
 
   setZoom: (zoom) => set({ zoom }),
+  updateEngineSync: (updates) =>
+    set((s) => ({ engineSync: { ...s.engineSync, ...updates } })),
   setAiModalOpen: (open) => set({ aiModalOpen: open }),
   setAiProgress: (progress) => set({ aiProgress: progress }),
   setLastAiParams: (params) => set({ lastAiParams: params }),

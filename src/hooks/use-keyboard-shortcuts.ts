@@ -84,6 +84,14 @@ export function useKeyboardShortcuts() {
         state.toggleOnionSkin();
         return;
       }
+
+      // ⌘⇧S / Ctrl+Shift+S — Manual push to engine
+      if (meta && e.shiftKey && e.key === "s") {
+        e.preventDefault();
+        // Dispatch a custom event that useEngineSync listens for
+        window.dispatchEvent(new CustomEvent("spriteforge:manual-push"));
+        return;
+      }
     };
 
     window.addEventListener("keydown", handler);

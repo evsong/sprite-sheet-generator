@@ -39,6 +39,8 @@ export function SettingsPanel() {
   const bins = useEditorStore((s) => s.bins);
   const activeBin = useEditorStore((s) => s.activeBin);
   const sprites = useEditorStore((s) => s.sprites);
+  const engineSync = useEditorStore((s) => s.engineSync);
+  const updateEngineSync = useEditorStore((s) => s.updateEngineSync);
   const { data: session } = useSession();
   const tier = (session?.user as Record<string, unknown> | undefined)?.tier as string ?? "FREE";
   const isPaid = tier === "PRO" || tier === "TEAM";
@@ -142,6 +144,53 @@ export function SettingsPanel() {
           </div>
         </div>
       )}
+      {/* Engine Sync */}
+      <div style={S.section}>
+        <h4 style={S.h4}>Engine Sync</h4>
+        <div style={S.row}>
+          <label style={S.label}>Auto-Sync</label>
+          <Toggle on={engineSync.autoSync} onClick={() => updateEngineSync({ autoSync: !engineSync.autoSync })} />
+        </div>
+        <div style={S.row}>
+          <label style={S.label}>Port</label>
+          <input
+            type="number"
+            min={1024}
+            max={65535}
+            value={engineSync.port}
+            onChange={(e) => {
+              const v = parseInt(e.target.value);
+              if (v >= 1024 && v <= 65535) updateEngineSync({ port: v });
+            }}
+            style={{ ...S.select, width: 60, textAlign: "right" }}
+            disabled={engineSync.connected}
+          />
+        </div>
+        <div style={S.row}>
+          <label style={S.label}>Status</label>
+          <span style={{
+            fontFamily: "var(--font-mono)", fontSize: 9,
+            color: engineSync.status === "connected" ? "#22C55E" : engineSync.status === "connecting" ? "#EAB308" : "var(--text-muted)",
+          }}>
+            {engineSync.status === "connected"
+              ? engineSync.engineName ?? "Connected"
+              : engineSync.status === "connecting"
+              ? "Connecting..."
+              : "Disconnected"}
+          </span>
+        </div>
+        {engineSync.lastPushAt && (
+          <div style={S.row}>
+            <label style={S.label}>Last Push</label>
+            <span style={S.val}>{new Date(engineSync.lastPushAt).toLocaleTimeString()}</span>
+          </div>
+        )}
+        {engineSync.mixedContentWarning && (
+          <div style={{ fontSize: 8, color: "#EAB308", fontFamily: "var(--font-mono)", marginTop: 2, lineHeight: 1.3 }}>
+            HTTPS detected — ws:// connections to localhost may be blocked. Use HTTP for local sync.
+          </div>
+        )}
+      </div>
     </div>
   );
 }

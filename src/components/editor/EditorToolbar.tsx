@@ -1,6 +1,7 @@
 import { useEditorStore } from "@/stores/editor-store";
 import { exportSpriteSheet } from "@/lib/exporter";
 import { exportProject, importProject } from "@/lib/project";
+import { SyncStatusIndicator } from "@/components/editor/SyncStatusIndicator";
 import { useCallback, useRef, useMemo, useState } from "react";
 
 export function EditorToolbar() {
@@ -89,8 +90,9 @@ export function EditorToolbar() {
         </button>
       </div>
 
-      {/* Right: stats + export + save */}
+      {/* Right: sync status + stats + export + save */}
       <div className="flex items-center gap-1.5">
+        <SyncStatusIndicator />
         <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-muted)" }}>
           {filteredCount} {isAssets ? "assets" : "frames"}{stats ? ` · ${stats.width}×${stats.height} · ${stats.density.toFixed(1)}%` : ""}
         </span>
