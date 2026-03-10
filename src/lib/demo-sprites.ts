@@ -11,12 +11,14 @@ const DEMO_SPRITES = [
   { name: "fairy", w: 48, h: 48, isAi: true, src: "/examples/fairy.png", mode: "atlas" as const },
   { name: "mushroom", w: 48, h: 48, isAi: true, src: "/examples/mushroom.png", mode: "atlas" as const },
   // Animation sequence → mode: "sequence"
-  { name: "fireball-01", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-01.png", mode: "sequence" as const },
-  { name: "fireball-02", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-02.png", mode: "sequence" as const },
-  { name: "fireball-03", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-03.png", mode: "sequence" as const },
-  { name: "fireball-04", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-04.png", mode: "sequence" as const },
-  { name: "fireball-05", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-05.png", mode: "sequence" as const },
-  { name: "fireball-06", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-06.png", mode: "sequence" as const },
+  { name: "mage-cast-01", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-01.png", mode: "sequence" as const },
+  { name: "mage-cast-02", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-02.png", mode: "sequence" as const },
+  { name: "mage-cast-03", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-03.png", mode: "sequence" as const },
+  { name: "mage-cast-04", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-04.png", mode: "sequence" as const },
+  { name: "mage-cast-05", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-05.png", mode: "sequence" as const },
+  { name: "mage-cast-06", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-06.png", mode: "sequence" as const },
+  { name: "mage-cast-07", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-07.png", mode: "sequence" as const },
+  { name: "mage-cast-08", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-08.png", mode: "sequence" as const },
 ];
 
 type DemoSprite = { id: string; name: string; file: null; image: HTMLImageElement; width: number; height: number; trimmed: boolean; isAi: boolean; isAnimation?: boolean; mode?: "sequence" | "atlas" };

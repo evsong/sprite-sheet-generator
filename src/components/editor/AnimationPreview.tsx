@@ -6,9 +6,12 @@ export function AnimationPreview() {
   const containerRef = useRef<HTMLDivElement>(null);
   const sprites = useEditorStore((s) => s.sprites);
   const animation = useEditorStore((s) => s.animation);
+  const selectedSpriteId = useEditorStore((s) => s.selectedSpriteId);
 
-  const currentSpriteId = animation.frames[animation.currentFrame];
-  const currentSprite = sprites.find((s) => s.id === currentSpriteId);
+  // When not playing and a sprite is selected, show it; otherwise show current animation frame
+  const selectedSprite = selectedSpriteId ? sprites.find((s) => s.id === selectedSpriteId && s.mode !== "atlas") : null;
+  const animSpriteId = animation.frames[animation.currentFrame];
+  const currentSprite = (!animation.playing && selectedSprite) ? selectedSprite : sprites.find((s) => s.id === animSpriteId);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -85,7 +88,7 @@ export function AnimationPreview() {
     ctx.lineWidth = 1;
     ctx.strokeRect(drawX, drawY, drawW, drawH);
 
-  }, [currentSprite, animation, sprites]);
+  }, [currentSprite, animation, sprites, selectedSpriteId]);
 
   return (
     <div
@@ -104,11 +107,15 @@ export function AnimationPreview() {
         }}
       >
         Preview
-        {animation.frames.length > 0 && (
+        {!animation.playing && selectedSprite ? (
+          <span style={{ color: "var(--cyan)", marginLeft: 6 }}>
+            {selectedSprite.name}
+          </span>
+        ) : animation.frames.length > 0 ? (
           <span style={{ color: "var(--cyan)", marginLeft: 6 }}>
             {String(animation.currentFrame + 1).padStart(2, "0")}/{String(animation.frames.length).padStart(2, "0")}
           </span>
-        )}
+        ) : null}
       </div>
 
       {/* Canvas */}

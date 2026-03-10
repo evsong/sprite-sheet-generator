@@ -30,7 +30,7 @@ export async function generateSpriteSheet(opts: GenerateOptions): Promise<Sprite
   const { prompt, style, frameCount, targetSize, mode = "sequence", onProgress } = opts;
 
   // Stage 1: API call
-  onProgress({ active: true, stage: "generating", stageLabel: "生成中...", completed: 0, total: frameCount, prompt });
+  onProgress({ active: true, stage: "generating", stageLabel: "Generating sprite sheet...", completed: 0, total: frameCount, prompt, startedAt: Date.now() });
 
   const res = await fetch("/api/ai/generate", {
     method: "POST",
@@ -46,13 +46,13 @@ export async function generateSpriteSheet(opts: GenerateOptions): Promise<Sprite
   const { spriteSheet, gridRows, gridCols } = await res.json();
 
   // Stage 2: Split
-  onProgress({ stage: "splitting", stageLabel: "切割中..." });
+  onProgress({ stage: "splitting", stageLabel: "Splitting into frames..." });
   const { frames } = await splitSpriteSheet(spriteSheet, frameCount, gridRows, gridCols);
 
   // Stage 3: Background removal
-  onProgress({ stage: "removing-bg", stageLabel: "去背景中... (0/" + frameCount + ")" });
+  onProgress({ stage: "removing-bg", stageLabel: `Removing background... (0/${frameCount})` });
   const cleanFrames = await processFrames(frames, (done, total) => {
-    onProgress({ stage: "removing-bg", stageLabel: `去背景中... (${done}/${total})`, completed: done, total });
+    onProgress({ stage: "removing-bg", stageLabel: `Removing background... (${done}/${total})`, completed: done, total });
   });
 
   // Stage 4: Resize + build sprites
@@ -72,6 +72,6 @@ export async function generateSpriteSheet(opts: GenerateOptions): Promise<Sprite
     });
   }
 
-  onProgress({ stage: "done", stageLabel: "完成 ✓", completed: frameCount, total: frameCount });
+  onProgress({ stage: "done", stageLabel: "Complete", completed: frameCount, total: frameCount });
   return sprites;
 }

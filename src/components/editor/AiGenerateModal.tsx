@@ -56,7 +56,9 @@ export function AiGenerateModal({ open, onClose, defaultMode }: AiGenerateModalP
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
-    const { addSprites, setAnimationFrames, setAiProgress } = useEditorStore.getState();
+    const { addSprites, setAnimationFrames, setAiProgress, setLastAiParams } = useEditorStore.getState();
+    const params = { prompt: prompt.trim(), style, frameCount, targetSize, mode };
+    setLastAiParams(params);
     onClose();
 
     try {

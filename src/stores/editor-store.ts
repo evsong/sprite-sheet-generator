@@ -60,6 +60,7 @@ export interface AiProgress {
   error?: string;
   stage?: AiStage;
   stageLabel?: string;
+  startedAt?: number;
 }
 
 export type EditorTab = "frames" | "assets";
@@ -105,6 +106,8 @@ interface EditorState {
   setAiModalOpen: (open: boolean) => void;
   setAiProgress: (progress: AiProgress | null) => void;
   setActiveTab: (tab: EditorTab) => void;
+  lastAiParams: { prompt: string; style: string; frameCount: number; targetSize: number; mode: import("@/lib/prompt-templates").GenerationMode } | null;
+  setLastAiParams: (params: EditorState["lastAiParams"]) => void;
 
   // Project
   loadProject: (data: { sprites: SpriteItem[]; packingConfig: PackingConfig; animation: Partial<AnimationState> }) => void;
@@ -140,6 +143,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   aiModalOpen: false,
   aiProgress: null,
   activeTab: "frames",
+  lastAiParams: null,
 
   addSprites: (newSprites) =>
     set((s) => ({ sprites: [...s.sprites, ...newSprites] })),
@@ -201,6 +205,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   setZoom: (zoom) => set({ zoom }),
   setAiModalOpen: (open) => set({ aiModalOpen: open }),
   setAiProgress: (progress) => set({ aiProgress: progress }),
+  setLastAiParams: (params) => set({ lastAiParams: params }),
   setActiveTab: (tab) => set({ activeTab: tab, activeBin: 0 }),
   loadProject: (data) =>
     set({
@@ -219,3 +224,8 @@ export const useEditorStore = create<EditorState>((set) => ({
       selectedSpriteId: null,
     }),
 }));
+
+// Expose store for dev tools
+if (typeof window !== "undefined") {
+  (window as unknown as Record<string, unknown>).__editorStore = useEditorStore;
+}
