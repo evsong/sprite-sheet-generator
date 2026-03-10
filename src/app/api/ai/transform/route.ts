@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { checkQuota, recordUsage } from "@/lib/ai-quota";
 
-type Action = "variants" | "recolor" | "upscale" | "extend-frames";
+type Action = "variants" | "extend-frames";
 
 const PROXY_URL = process.env.GEMINI_PROXY_URL || "https://code.newcli.com/gemini";
 const PROXY_TOKEN = process.env.GEMINI_PROXY_TOKEN;
@@ -53,6 +53,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "action and imageBase64 required" }, { status: 400 });
     }
 
+    if (action !== "variants" && action !== "extend-frames") {
+      return NextResponse.json({ error: "Invalid action. Only 'variants' and 'extend-frames' are supported." }, { status: 400 });
+    }
+
     if (!PROXY_TOKEN) {
       return NextResponse.json({ error: "AI not configured" }, { status: 503 });
     }
@@ -76,8 +80,6 @@ export async function POST(req: NextRequest) {
 
     const promptMap: Record<string, string> = {
       variants: prompt || "Create a variation of this game sprite with a different pose, keep the same character and art style, transparent background",
-      recolor: prompt || "Recolor this sprite with a completely different color palette, keep the same pose and shape, transparent background",
-      upscale: "Upscale this image to higher resolution, preserve all details and pixel art style exactly, transparent background",
       "extend-frames": prompt || "Create the next animation frame for this game sprite, maintain consistent style and character, transparent background",
     };
 

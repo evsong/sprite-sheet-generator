@@ -1,5 +1,8 @@
 import { useEditorStore } from "@/stores/editor-store";
 import { removeBackground } from "@/lib/bg-removal";
+import { mutateQuota } from "@/components/editor/AiQuotaIndicator";
+import { autoRecolor } from "@/lib/recolor";
+import { upscaleNearest } from "@/lib/upscale";
 import { useCallback, useState } from "react";
 
 export function AssetGrid() {
@@ -37,14 +40,40 @@ export function AssetGrid() {
     return c.toDataURL("image/png");
   }, [sprites]);
 
-  const handleAiAction = useCallback(async (spriteId: string, action: "variants" | "recolor" | "upscale") => {
+  const handleToolAction = useCallback(async (spriteId: string, action: "recolor" | "upscale") => {
+    const sprite = sprites.find((s) => s.id === spriteId);
+    if (!sprite?.image) return;
+    const { addSprites } = useEditorStore.getState();
+    if (action === "recolor") {
+      const result = await autoRecolor(sprite.image);
+      addSprites([{ id: crypto.randomUUID(), name: `${sprite.name}-recolor`, file: new File([result.blob], `${sprite.name}-recolor.png`, { type: "image/png" }), image: result.image, normalMap: null, width: result.image.naturalWidth, height: result.image.naturalHeight, trimmed: false, isAi: false, mode: "atlas", pivot: { x: 0.5, y: 0.5 } }]);
+    } else {
+      const result = await upscaleNearest(sprite.image, 2);
+      addSprites([{ id: crypto.randomUUID(), name: `${sprite.name}-2x`, file: new File([result.blob], `${sprite.name}-2x.png`, { type: "image/png" }), image: result.image, normalMap: null, width: result.image.naturalWidth, height: result.image.naturalHeight, trimmed: false, isAi: false, mode: "atlas", pivot: { x: 0.5, y: 0.5 } }]);
+    }
+  }, [sprites]);
+
+  const handleAiAction = useCallback(async (spriteId: string, action: "variants") => {
     const sprite = sprites.find((s) => s.id === spriteId);
     if (!sprite) return;
     const b64 = spriteToBase64(spriteId);
     if (!b64) return;
     const { addSprites, setAiProgress } = useEditorStore.getState();
-    const total = action === "variants" ? 3 : 1;
-    const label = { variants: "Generating variants", recolor: "Recoloring", upscale: "Upscaling" }[action];
+    const total = 3;
+    const label = "Generating variants";
+
+    // Pre-check quota
+    try {
+      const qRes = await fetch("/api/ai/quota");
+      if (qRes.ok) {
+        const q = await qRes.json();
+        if (q.used >= q.limit) {
+          setAiProgress({ active: false, total, completed: 0, prompt: label, error: `Daily AI limit reached (${q.used}/${q.limit}). Upgrade for more.` });
+          return;
+        }
+      }
+    } catch { /* fail-open */ }
+
     setAiProgress({ active: true, total, completed: 0, prompt: label });
     try {
       const res = await fetch("/api/ai/transform", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, imageBase64: b64, count: total }) });
@@ -53,10 +82,10 @@ export function AssetGrid() {
       for (let i = 0; i < data.images.length; i++) {
         const img = new Image();
         await new Promise<void>((resolve) => { img.onload = () => resolve(); img.src = data.images[i]; });
-        const suffix = action === "upscale" ? "-2x" : `-${action}-${i + 1}`;
-        addSprites([{ id: crypto.randomUUID(), name: `${sprite.name}${suffix}`, file: null, image: img, normalMap: null, width: img.naturalWidth, height: img.naturalHeight, trimmed: false, isAi: true, mode: "atlas", pivot: { x: 0.5, y: 0.5 } }]);
+        addSprites([{ id: crypto.randomUUID(), name: `${sprite.name}-variants-${i + 1}`, file: null, image: img, normalMap: null, width: img.naturalWidth, height: img.naturalHeight, trimmed: false, isAi: true, mode: "atlas", pivot: { x: 0.5, y: 0.5 } }]);
         setAiProgress({ active: true, total, completed: i + 1, prompt: label });
       }
+      mutateQuota();
       setTimeout(() => setAiProgress(null), 2000);
     } catch { setAiProgress({ active: false, total, completed: 0, prompt: label, error: "Network error" }); }
   }, [sprites, spriteToBase64]);
@@ -111,10 +140,11 @@ export function AssetGrid() {
           <div className="fixed z-[200] py-0.5" style={{ left: contextMenu.x, top: contextMenu.y, minWidth: 160, background: "var(--bg-panel)", border: "1px solid var(--border)", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.5), 0 12px 32px rgba(0,0,0,0.6)" }}>
             <CtxItem icon="del" label="Delete" danger onClick={() => { removeSprite(contextMenu.spriteId); setContextMenu(null); }} />
             <div style={{ height: 1, background: "var(--border)", margin: "3px 0" }} />
+            <CtxItem icon="recolor" label="Recolor" tool onClick={() => { handleToolAction(contextMenu.spriteId, "recolor"); setContextMenu(null); }} />
+            <CtxItem icon="upscale" label="Upscale 2×" tool onClick={() => { handleToolAction(contextMenu.spriteId, "upscale"); setContextMenu(null); }} />
+            <CtxItem icon="rmbg" label={processingBg ? "Removing BG..." : "Remove BG"} tool onClick={() => { handleRemoveBg(contextMenu.spriteId); setContextMenu(null); }} />
+            <div style={{ height: 1, background: "var(--border)", margin: "3px 0" }} />
             <CtxItem icon="star" label="AI Variants" ai onClick={() => { handleAiAction(contextMenu.spriteId, "variants"); setContextMenu(null); }} />
-            <CtxItem icon="recolor" label="AI Recolor" ai onClick={() => { handleAiAction(contextMenu.spriteId, "recolor"); setContextMenu(null); }} />
-            <CtxItem icon="upscale" label="AI Upscale 2x" ai onClick={() => { handleAiAction(contextMenu.spriteId, "upscale"); setContextMenu(null); }} />
-            <CtxItem icon="rmbg" label={processingBg ? "Removing BG..." : "AI Remove BG"} ai onClick={() => { handleRemoveBg(contextMenu.spriteId); setContextMenu(null); }} />
           </div>
         </>
       )}
@@ -122,13 +152,14 @@ export function AssetGrid() {
   );
 }
 
-function CtxItem({ label, ai, danger, icon, onClick }: { label: string; ai?: boolean; danger?: boolean; icon?: string; onClick: () => void }) {
-  const color = ai ? "var(--amber)" : danger ? "#EF4444" : "var(--text-dim)";
-  const hoverBg = ai ? "rgba(245,158,11,0.08)" : danger ? "rgba(239,68,68,0.08)" : "var(--bg-elevated)";
+function CtxItem({ label, ai, tool, danger, icon, onClick }: { label: string; ai?: boolean; tool?: boolean; danger?: boolean; icon?: string; onClick: () => void }) {
+  const color = ai ? "var(--amber)" : tool ? "var(--cyan)" : danger ? "#EF4444" : "var(--text-dim)";
+  const hoverColor = ai ? "#FBBF24" : tool ? "#22D3EE" : danger ? "#EF4444" : "var(--text)";
+  const hoverBg = ai ? "rgba(245,158,11,0.08)" : tool ? "rgba(6,182,212,0.08)" : danger ? "rgba(239,68,68,0.08)" : "var(--bg-elevated)";
   return (
     <button onClick={onClick} className="flex items-center gap-1.5 w-full transition-all duration-100"
       style={{ padding: "4px 10px", fontFamily: "var(--font-mono)", fontSize: 9, color }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = hoverBg; e.currentTarget.style.color = ai ? "#FBBF24" : danger ? "#EF4444" : "var(--text)"; }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = hoverBg; e.currentTarget.style.color = hoverColor; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = ""; e.currentTarget.style.color = color; }}>
       {icon && <span style={{ width: 14, height: 14, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><CtxIcon type={icon} /></span>}
       <span>{label}</span>
