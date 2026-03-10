@@ -10,6 +10,13 @@ const DEMO_SPRITES = [
   { name: "skeleton", w: 64, h: 64, isAi: true, src: "/examples/skeleton.png", mode: "atlas" as const },
   { name: "fairy", w: 48, h: 48, isAi: true, src: "/examples/fairy.png", mode: "atlas" as const },
   { name: "mushroom", w: 48, h: 48, isAi: true, src: "/examples/mushroom.png", mode: "atlas" as const },
+  // Animation sequence → mode: "sequence"
+  { name: "fireball-01", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-01.png", mode: "sequence" as const },
+  { name: "fireball-02", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-02.png", mode: "sequence" as const },
+  { name: "fireball-03", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-03.png", mode: "sequence" as const },
+  { name: "fireball-04", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-04.png", mode: "sequence" as const },
+  { name: "fireball-05", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-05.png", mode: "sequence" as const },
+  { name: "fireball-06", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-06.png", mode: "sequence" as const },
 ];
 
 type DemoSprite = { id: string; name: string; file: null; image: HTMLImageElement; width: number; height: number; trimmed: boolean; isAi: boolean; isAnimation?: boolean; mode?: "sequence" | "atlas" };

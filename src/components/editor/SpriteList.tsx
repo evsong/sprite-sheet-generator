@@ -182,7 +182,7 @@ export function SpriteList() {
               onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
               onClick={() => selectSprite(sprite.id)}
               onContextMenu={(e) => { e.preventDefault(); selectSprite(sprite.id); setContextMenu({ x: e.clientX, y: e.clientY, spriteId: sprite.id }); }}
-              className={`flex items-center gap-1 cursor-pointer transition-all duration-100 ${
+              className={`group flex items-center gap-1 cursor-pointer transition-all duration-100 ${
                 selectedSpriteId === sprite.id ? "bg-[var(--bg-elevated)] text-[var(--cyan)]" : "text-[var(--text-dim)] hover:bg-[var(--bg-surface)] hover:text-[var(--text)]"
               } ${dragOverIndex === index && dragIndex !== index ? "border-t border-t-[var(--cyan)]" : ""} ${dragIndex === index ? "opacity-40" : ""}`}
               style={{ padding: "2px 4px", fontFamily: "var(--font-mono)", fontSize: 9 }}>
@@ -194,6 +194,12 @@ export function SpriteList() {
               <span className="truncate">{sprite.name}.png</span>
               {sprite.isAi && <span style={{ fontFamily: "var(--font-mono)", fontSize: 6, color: "var(--amber)", background: "rgba(245,158,11,0.12)", padding: "0 3px", lineHeight: "1.5", letterSpacing: "0.05em", flexShrink: 0 }}>AI</span>}
               <span className="ml-auto shrink-0" style={{ color: "var(--text-muted)", fontSize: 8 }}>{sprite.width}×{sprite.height}</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); removeSprite(sprite.id); }}
+                className="shrink-0 opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all"
+                style={{ width: 14, height: 14, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", fontSize: 10, marginLeft: 2 }}
+                title="Delete"
+              >×</button>
             </div>
           ))}
         </div>
