@@ -6,6 +6,8 @@ export function AssetGrid() {
   const sprites = useEditorStore((s) => s.sprites);
   const selectedSpriteId = useEditorStore((s) => s.selectedSpriteId);
   const selectSprite = useEditorStore((s) => s.selectSprite);
+  const bins = useEditorStore((s) => s.bins);
+  const setActiveBin = useEditorStore((s) => s.setActiveBin);
   const removeSprite = useEditorStore((s) => s.removeSprite);
   const updateSprite = useEditorStore((s) => s.updateSprite);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; spriteId: string } | null>(null);
@@ -74,7 +76,7 @@ export function AssetGrid() {
         <div className="flex gap-1 overflow-x-auto flex-1 py-1 flex-wrap">
           {atlasSprites.map((sprite) => (
             <button key={sprite.id}
-              onClick={() => selectSprite(sprite.id)}
+              onClick={() => { selectSprite(sprite.id); const bi = bins.findIndex((b) => b.rects.some((r) => r.spriteId === sprite.id)); if (bi >= 0) setActiveBin(bi); }}
               onContextMenu={(e) => { e.preventDefault(); selectSprite(sprite.id); setContextMenu({ x: e.clientX, y: e.clientY, spriteId: sprite.id }); }}
               className="shrink-0 flex items-center justify-center cursor-pointer transition-all"
               style={{
