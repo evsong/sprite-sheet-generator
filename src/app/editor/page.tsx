@@ -10,6 +10,7 @@ import { AnimationPreview } from "@/components/editor/AnimationPreview";
 import { AiGenerateModal } from "@/components/editor/AiGenerateModal";
 import { AssetPreview } from "@/components/editor/AssetPreview";
 import { AiProgressToast } from "@/components/editor/AiProgressToast";
+import { AtlasDiffViewer } from "@/components/editor/AtlasDiffViewer";
 import { useAutoPack } from "@/hooks/use-auto-pack";
 import { useAnimationPlayback } from "@/hooks/use-animation-playback";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
@@ -25,6 +26,7 @@ export default function EditorPage() {
 
   const aiModalOpen = useEditorStore((s) => s.aiModalOpen);
   const setAiModalOpen = useEditorStore((s) => s.setAiModalOpen);
+  const diffActive = useEditorStore((s) => s.diffState.active);
   const activeTab = useEditorStore((s) => s.activeTab);
   const sprites = useEditorStore((s) => s.sprites);
   const addSprites = useEditorStore((s) => s.addSprites);
@@ -91,6 +93,7 @@ export default function EditorPage() {
       </div>
       <AiGenerateModal open={aiModalOpen} onClose={() => setAiModalOpen(false)} defaultMode={activeTab === "assets" ? "atlas" : "sequence"} />
       <AiProgressToast />
+      {diffActive && <AtlasDiffViewer />}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useEditorStore } from "@/stores/editor-store";
 import { exportSpriteSheet } from "@/lib/exporter";
 import { exportProject, importProject } from "@/lib/project";
+import { CompareButton } from "./AtlasDiffViewer";
 import { useCallback, useRef, useMemo, useState } from "react";
 
 export function EditorToolbar() {
@@ -12,6 +13,8 @@ export function EditorToolbar() {
   const clearSprites = useEditorStore((s) => s.clearSprites);
   const loadProjectAction = useEditorStore((s) => s.loadProject);
   const activeTab = useEditorStore((s) => s.activeTab);
+  const pivotEditMode = useEditorStore((s) => s.pivotEditMode);
+  const setPivotEditMode = useEditorStore((s) => s.setPivotEditMode);
   const openFileRef = useRef<HTMLInputElement>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
 
@@ -89,11 +92,33 @@ export function EditorToolbar() {
         </button>
       </div>
 
-      {/* Right: stats + export + save */}
+      {/* Right: stats + pivot + compare + export + save */}
       <div className="flex items-center gap-1.5">
         <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-muted)" }}>
           {filteredCount} {isAssets ? "assets" : "frames"}{stats ? ` · ${stats.width}×${stats.height} · ${stats.density.toFixed(1)}%` : ""}
         </span>
+        <button
+          onClick={() => setPivotEditMode(!pivotEditMode)}
+          title="Toggle Pivot Edit Mode"
+          className="hover:border-[var(--text)] hover:text-[var(--text)] transition-all duration-100"
+          style={{
+            height: 20, padding: "0 6px", fontSize: "9px",
+            border: `1px solid ${pivotEditMode ? "var(--cyan)" : "var(--border)"}`,
+            color: pivotEditMode ? "var(--cyan)" : "var(--text-dim)",
+            background: pivotEditMode ? "rgba(6,182,212,0.1)" : "transparent",
+            fontFamily: "var(--font-mono)", fontWeight: 600,
+            textTransform: "uppercase", letterSpacing: "0.05em",
+          }}
+        >
+          <svg viewBox="0 0 16 16" width="10" height="10" style={{ verticalAlign: "-1px", display: "inline" }}>
+            <circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            <line x1="8" y1="1" x2="8" y2="5" stroke="currentColor" strokeWidth="1.5" />
+            <line x1="8" y1="11" x2="8" y2="15" stroke="currentColor" strokeWidth="1.5" />
+            <line x1="1" y1="8" x2="5" y2="8" stroke="currentColor" strokeWidth="1.5" />
+            <line x1="11" y1="8" x2="15" y2="8" stroke="currentColor" strokeWidth="1.5" />
+          </svg>
+        </button>
+        <CompareButton />
         <div className="relative">
           <button
             onClick={() => setShowExportMenu(!showExportMenu)}

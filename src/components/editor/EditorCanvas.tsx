@@ -1,4 +1,5 @@
 import { useEditorStore } from "@/stores/editor-store";
+import { PivotOverlay } from "./PivotOverlay";
 import { useRef, useEffect, useCallback, useMemo } from "react";
 
 export function EditorCanvas() {
@@ -14,6 +15,7 @@ export function EditorCanvas() {
   const addSprites = useEditorStore((s) => s.addSprites);
   const animation = useEditorStore((s) => s.animation);
   const activeTab = useEditorStore((s) => s.activeTab);
+  const pivotEditMode = useEditorStore((s) => s.pivotEditMode);
   const fitZoomApplied = useRef(false);
 
   // Reset auto-fit when tab changes so zoom recalculates for new content
@@ -128,7 +130,36 @@ export function EditorCanvas() {
         ctx.restore();
       }
     }
-  }, [bins, activeBin, sprites, selectedSpriteId, animation]);
+
+    // Draw pivot crosshairs for all sprites (dimmed) and highlighted for selected
+    if (pivotEditMode) {
+      bin.rects.forEach((rect) => {
+        const sprite = sprites.find((s) => s.id === rect.spriteId);
+        if (!sprite) return;
+        const rw = rect.rot ? rect.height : rect.width;
+        const rh = rect.rot ? rect.width : rect.height;
+        const px = rect.x + sprite.pivot.x * rw;
+        const py = rect.y + sprite.pivot.y * rh;
+        const isSelected = sprite.id === selectedSpriteId;
+        const color = isSelected ? "#06B6D4" : "rgba(6,182,212,0.3)";
+        const size = isSelected ? 6 : 3;
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 1;
+        // Crosshair lines
+        ctx.beginPath();
+        ctx.moveTo(px - size, py); ctx.lineTo(px + size, py);
+        ctx.moveTo(px, py - size); ctx.lineTo(px, py + size);
+        ctx.stroke();
+        // Center dot
+        ctx.beginPath();
+        ctx.arc(px, py, isSelected ? 1.5 : 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+  }, [bins, activeBin, sprites, selectedSpriteId, animation, pivotEditMode]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -140,7 +171,7 @@ export function EditorCanvas() {
       if (!file.type.startsWith("image/")) return;
       const img = new Image();
       img.onload = () => {
-        newSprites.push({ id: crypto.randomUUID(), name: file.name.replace(/\.[^.]+$/, ""), file, image: img, width: img.naturalWidth, height: img.naturalHeight, trimmed: false, isAi: false });
+        newSprites.push({ id: crypto.randomUUID(), name: file.name.replace(/\.[^.]+$/, ""), file, image: img, width: img.naturalWidth, height: img.naturalHeight, trimmed: false, isAi: false, pivot: { x: 0.5, y: 0.5 } });
         loaded++;
         if (loaded === files.length) addSprites(newSprites);
       };
@@ -177,6 +208,9 @@ export function EditorCanvas() {
             style={{ outline: "1px solid rgba(6,182,212,0.2)", imageRendering: zoom >= 2 ? "pixelated" : "auto" }} />
         </div>
       </div>
+
+      {/* Pivot overlay */}
+      <PivotOverlay />
 
       {/* Canvas info bar */}
       <div className="absolute flex gap-2" style={{

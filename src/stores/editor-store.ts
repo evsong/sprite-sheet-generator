@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import type { GenerationMode } from "@/lib/prompt-templates";
 
+export interface PivotPoint {
+  x: number; // 0..1 normalized (0.5 = center)
+  y: number;
+}
+
 export interface SpriteItem {
   id: string;
   name: string;
@@ -13,6 +18,8 @@ export interface SpriteItem {
   sourceSize?: { w: number; h: number };
   isAi: boolean;
   mode?: GenerationMode;
+  pivot: PivotPoint;
+  tags?: Record<string, string>;
 }
 
 export interface PackedRect {
@@ -65,6 +72,17 @@ export interface AiProgress {
 
 export type EditorTab = "frames" | "assets";
 
+export type DiffViewMode = "side-by-side" | "overlay";
+
+export interface DiffState {
+  active: boolean;
+  before: ImageData | null;
+  after: ImageData | null;
+  diff: ImageData | null;
+  viewMode: DiffViewMode;
+  mismatchCount: number;
+}
+
 interface EditorState {
   sprites: SpriteItem[];
   bins: PackedBin[];
@@ -75,6 +93,21 @@ interface EditorState {
   zoom: number;
   aiProgress: AiProgress | null;
   activeTab: EditorTab;
+
+  // Pivot edit mode
+  pivotEditMode: boolean;
+  setPivotEditMode: (on: boolean) => void;
+
+  // Filename pattern for auto-tagging
+  filenamePattern: string;
+  autoTagOnImport: boolean;
+  setFilenamePattern: (pattern: string) => void;
+  setAutoTagOnImport: (on: boolean) => void;
+
+  // Atlas diff state
+  diffState: DiffState;
+  setDiffState: (state: Partial<DiffState>) => void;
+  clearDiff: () => void;
 
   // Sprite actions
   addSprites: (sprites: SpriteItem[]) => void;
@@ -116,6 +149,15 @@ interface EditorState {
   setZoom: (zoom: number) => void;
 }
 
+const DEFAULT_DIFF_STATE: DiffState = {
+  active: false,
+  before: null,
+  after: null,
+  diff: null,
+  viewMode: "side-by-side",
+  mismatchCount: 0,
+};
+
 export const useEditorStore = create<EditorState>((set) => ({
   sprites: [],
   bins: [],
@@ -144,6 +186,22 @@ export const useEditorStore = create<EditorState>((set) => ({
   aiProgress: null,
   activeTab: "frames",
   lastAiParams: null,
+
+  // Pivot edit mode
+  pivotEditMode: false,
+  setPivotEditMode: (on) => set({ pivotEditMode: on }),
+
+  // Filename pattern
+  filenamePattern: "(?<name>.+?)[-_](?<index>\\d+)",
+  autoTagOnImport: true,
+  setFilenamePattern: (pattern) => set({ filenamePattern: pattern }),
+  setAutoTagOnImport: (on) => set({ autoTagOnImport: on }),
+
+  // Atlas diff
+  diffState: { ...DEFAULT_DIFF_STATE },
+  setDiffState: (state) =>
+    set((s) => ({ diffState: { ...s.diffState, ...state } })),
+  clearDiff: () => set({ diffState: { ...DEFAULT_DIFF_STATE } }),
 
   addSprites: (newSprites) =>
     set((s) => ({ sprites: [...s.sprites, ...newSprites] })),
