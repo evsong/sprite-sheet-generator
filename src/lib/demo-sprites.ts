@@ -1,23 +1,18 @@
 const DEMO_SPRITES = [
-  { name: "knight", w: 64, h: 64, isAi: true, src: "/examples/knight.png" },
-  { name: "mage", w: 64, h: 64, isAi: true, src: "/examples/mage.png" },
-  { name: "slime", w: 64, h: 64, isAi: true, src: "/examples/slime.png" },
-  { name: "dragon", w: 64, h: 64, isAi: true, src: "/examples/dragon.png" },
-  { name: "treasure", w: 48, h: 48, isAi: true, src: "/examples/treasure.png" },
-  { name: "potion", w: 32, h: 32, isAi: true, src: "/examples/potion.png" },
-  { name: "sword", w: 32, h: 32, isAi: true, src: "/examples/sword.png" },
-  { name: "skeleton", w: 64, h: 64, isAi: true, src: "/examples/skeleton.png" },
-  { name: "fairy", w: 48, h: 48, isAi: true, src: "/examples/fairy.png" },
-  { name: "mushroom", w: 48, h: 48, isAi: true, src: "/examples/mushroom.png" },
-  ...Array.from({ length: 10 }, (_, i) => ({
-    name: `fireball-${String(i + 1).padStart(2, "0")}`,
-    w: 64, h: 64, isAi: true,
-    src: `/examples/mage-fireball/frame-${String(i + 1).padStart(2, "0")}.png`,
-    isAnimation: true,
-  })),
+  // Independent assets → mode: "atlas"
+  { name: "knight", w: 64, h: 64, isAi: true, src: "/examples/knight.png", mode: "atlas" as const },
+  { name: "mage", w: 64, h: 64, isAi: true, src: "/examples/mage.png", mode: "atlas" as const },
+  { name: "slime", w: 64, h: 64, isAi: true, src: "/examples/slime.png", mode: "atlas" as const },
+  { name: "dragon", w: 64, h: 64, isAi: true, src: "/examples/dragon.png", mode: "atlas" as const },
+  { name: "treasure", w: 48, h: 48, isAi: true, src: "/examples/treasure.png", mode: "atlas" as const },
+  { name: "potion", w: 32, h: 32, isAi: true, src: "/examples/potion.png", mode: "atlas" as const },
+  { name: "sword", w: 32, h: 32, isAi: true, src: "/examples/sword.png", mode: "atlas" as const },
+  { name: "skeleton", w: 64, h: 64, isAi: true, src: "/examples/skeleton.png", mode: "atlas" as const },
+  { name: "fairy", w: 48, h: 48, isAi: true, src: "/examples/fairy.png", mode: "atlas" as const },
+  { name: "mushroom", w: 48, h: 48, isAi: true, src: "/examples/mushroom.png", mode: "atlas" as const },
 ];
 
-type DemoSprite = { id: string; name: string; file: null; image: HTMLImageElement; width: number; height: number; trimmed: boolean; isAi: boolean; isAnimation?: boolean };
+type DemoSprite = { id: string; name: string; file: null; image: HTMLImageElement; width: number; height: number; trimmed: boolean; isAi: boolean; isAnimation?: boolean; mode?: "sequence" | "atlas" };
 
 export function loadDemoSprites(): Promise<DemoSprite[]> {
   return Promise.all(
@@ -26,7 +21,7 @@ export function loadDemoSprites(): Promise<DemoSprite[]> {
         new Promise<DemoSprite>((resolve) => {
           const img = new Image();
           img.onload = () =>
-            resolve({ id: crypto.randomUUID(), name: s.name, file: null, image: img, width: s.w, height: s.h, trimmed: false, isAi: s.isAi, isAnimation: "isAnimation" in s ? true : undefined });
+            resolve({ id: crypto.randomUUID(), name: s.name, file: null, image: img, width: s.w, height: s.h, trimmed: false, isAi: s.isAi, isAnimation: "isAnimation" in s ? true : undefined, mode: s.mode });
           img.src = s.src;
         })
     )

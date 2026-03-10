@@ -8,10 +8,28 @@ export function EditorCanvas() {
   const bins = useEditorStore((s) => s.bins);
   const activeBin = useEditorStore((s) => s.activeBin);
   const zoom = useEditorStore((s) => s.zoom);
+  const setZoom = useEditorStore((s) => s.setZoom);
   const selectedSpriteId = useEditorStore((s) => s.selectedSpriteId);
   const selectSprite = useEditorStore((s) => s.selectSprite);
   const addSprites = useEditorStore((s) => s.addSprites);
   const animation = useEditorStore((s) => s.animation);
+  const fitZoomApplied = useRef(false);
+
+  // Auto-fit zoom when bin changes or on first load
+  useEffect(() => {
+    const bin = bins[activeBin];
+    const container = containerRef.current;
+    if (!bin || !container) { fitZoomApplied.current = false; return; }
+    // Only auto-fit on first pack or when bin size changes
+    if (fitZoomApplied.current) return;
+    fitZoomApplied.current = true;
+    const rect = container.getBoundingClientRect();
+    const padding = 32;
+    const fitW = (rect.width - padding) / bin.width;
+    const fitH = (rect.height - padding) / bin.height;
+    const fit = Math.min(fitW, fitH, 1); // never zoom above 1:1
+    setZoom(Math.round(fit * 100) / 100);
+  }, [bins, activeBin, setZoom]);
 
   const stats = useMemo(() => {
     const bin = bins[activeBin];
