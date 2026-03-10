@@ -13,6 +13,8 @@ export interface SpriteItem {
   sourceSize?: { w: number; h: number };
   isAi: boolean;
   mode?: GenerationMode;
+  /** Folder/group name for sprites imported via directory drop */
+  group?: string;
 }
 
 export interface PackedRect {
@@ -22,6 +24,8 @@ export interface PackedRect {
   width: number;
   height: number;
   rot: boolean;
+  /** Index of the bin/page this rect belongs to (for multi-atlas) */
+  binIndex: number;
 }
 
 export interface PackedBin {
@@ -39,6 +43,8 @@ export interface PackingConfig {
   allowRotation: boolean;
   trimTransparency: boolean;
   exportFormat: string;
+  /** Maximum number of atlas pages (0 = unlimited) */
+  maxPages: number;
 }
 
 export interface AnimationState {
@@ -130,6 +136,7 @@ export const useEditorStore = create<EditorState>((set) => ({
     allowRotation: false,
     trimTransparency: true,
     exportFormat: "json",
+    maxPages: 0,
   },
   animation: {
     frames: [],

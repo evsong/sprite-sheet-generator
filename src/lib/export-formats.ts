@@ -22,7 +22,7 @@ const T_JSON_ARRAY = `{
     }{{^last}},{{/last}}
     {{/rects}}
   ],
-  "meta": { "app": "SpriteForge", "version": "1.0", "image": "{{config.imageName}}", "format": "RGBA8888", "size": { "w": {{config.imageWidth}}, "h": {{config.imageHeight}} }, "scale": 1 }
+  "meta": { "app": "SpriteForge", "version": "1.0", "image": "{{config.imageName}}", "format": "RGBA8888", "size": { "w": {{config.imageWidth}}, "h": {{config.imageHeight}} }, "scale": 1{{#hasRelatedPacks}}, "related_multi_packs": [{{#relatedPacks}}"{{{.}}}"{{^last}},{{/last}}{{/relatedPacks}}]{{/hasRelatedPacks}} }
 }`;
 
 const T_JSON_HASH = `{
@@ -37,7 +37,7 @@ const T_JSON_HASH = `{
     }{{^last}},{{/last}}
     {{/rects}}
   },
-  "meta": { "app": "SpriteForge", "version": "1.0", "image": "{{config.imageName}}", "format": "RGBA8888", "size": { "w": {{config.imageWidth}}, "h": {{config.imageHeight}} }, "scale": 1 }
+  "meta": { "app": "SpriteForge", "version": "1.0", "image": "{{config.imageName}}", "format": "RGBA8888", "size": { "w": {{config.imageWidth}}, "h": {{config.imageHeight}} }, "scale": 1{{#hasRelatedPacks}}, "related_multi_packs": [{{#relatedPacks}}"{{{.}}}"{{^last}},{{/last}}{{/relatedPacks}}]{{/hasRelatedPacks}} }
 }`;
 
 const T_PHASER3 = `{

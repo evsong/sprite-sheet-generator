@@ -1,6 +1,6 @@
 import { useEditorStore, SpriteItem } from "@/stores/editor-store";
 import { removeBackground } from "@/lib/bg-removal";
-import { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 
 function CtxIcon({ d, type }: { d: string; type?: string }) {
   if (type === "dup") return <svg viewBox="0 0 16 16" width="11" height="11"><rect x="1" y="1" width="6" height="6" fill="currentColor" opacity="0.6"/><rect x="9" y="1" width="6" height="6" fill="currentColor" opacity="0.4"/><rect x="1" y="9" width="6" height="6" fill="currentColor" opacity="0.3"/></svg>;
@@ -71,6 +71,62 @@ export function SpriteList() {
       img.src = URL.createObjectURL(file);
     });
   }, [addSprites]);
+
+  const handleDirectoryDrop = useCallback(async (dataTransfer: DataTransfer) => {
+    const { scanDataTransfer, detectSequenceGroups } = await import("@/lib/folder-scanner");
+    const scanned = await scanDataTransfer(dataTransfer);
+    if (scanned.length === 0) return;
+
+    const currentTab = useEditorStore.getState().activeTab;
+    const importMode = currentTab === "assets" ? "atlas" as const : "sequence" as const;
+
+    const newSprites: SpriteItem[] = [];
+    for (const item of scanned) {
+      const img = new Image();
+      await new Promise<void>((resolve) => {
+        img.onload = () => {
+          newSprites.push({
+            id: crypto.randomUUID(),
+            name: item.file.name.replace(/\.[^.]+$/, ""),
+            file: item.file,
+            image: img,
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+            trimmed: false,
+            isAi: false,
+            mode: importMode,
+            group: item.group || undefined,
+          });
+          resolve();
+        };
+        img.onerror = () => resolve();
+        img.src = URL.createObjectURL(item.file);
+      });
+    }
+
+    if (newSprites.length === 0) return;
+    addSprites(newSprites);
+
+    // Auto-create animation sequence from folder groups
+    if (importMode === "sequence") {
+      const sequenceGroups = detectSequenceGroups(scanned);
+      if (sequenceGroups.size > 0) {
+        const nameToId = new Map(newSprites.map((s) => [s.name, s.id]));
+        const allFrameIds: string[] = [];
+        for (const [, groupFiles] of sequenceGroups) {
+          for (const f of groupFiles) {
+            const name = f.file.name.replace(/\.[^.]+$/, "");
+            const id = nameToId.get(name);
+            if (id) allFrameIds.push(id);
+          }
+        }
+        if (allFrameIds.length > 0) {
+          const existing = useEditorStore.getState().animation.frames;
+          setAnimationFrames([...existing, ...allFrameIds]);
+        }
+      }
+    }
+  }, [addSprites, setAnimationFrames]);
 
   const handleRemoveBg = useCallback(async (spriteId: string) => {
     const sprite = sprites.find((s) => s.id === spriteId);
@@ -143,11 +199,22 @@ export function SpriteList() {
         <div
           onClick={() => fileInputRef.current?.click()}
           onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) e.preventDefault(); }}
-          onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.files.length > 0) handleFileUpload(e.dataTransfer.files); }}
+          onDrop={(e) => {
+            e.preventDefault();
+            // Check for directory entries first (folder drop)
+            const hasDir = e.dataTransfer.items && Array.from(e.dataTransfer.items).some(
+              (item) => item.kind === "file" && item.webkitGetAsEntry?.()?.isDirectory
+            );
+            if (hasDir) {
+              handleDirectoryDrop(e.dataTransfer);
+            } else if (e.dataTransfer.files.length > 0) {
+              handleFileUpload(e.dataTransfer.files);
+            }
+          }}
           className="cursor-pointer hover:border-[var(--cyan)] transition-colors"
           style={{ border: "1px dashed var(--border)", padding: "10px 6px", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-muted)" }}
         >
-          {isAssets ? "Drop PNG / JPG assets" : "Drop PNG / JPG frames"}<br />or click to browse
+          {isAssets ? "Drop PNG / JPG assets or folders" : "Drop PNG / JPG frames or folders"}<br />or click to browse
         </div>
         <input ref={fileInputRef} type="file" multiple accept="image/png,image/webp,image/gif,image/jpeg" className="hidden"
           onChange={(e) => e.target.files && handleFileUpload(e.target.files)} />
@@ -174,8 +241,29 @@ export function SpriteList() {
           {isAssets ? `Assets (${filteredSprites.length})` : `Frames (${filteredSprites.length})`}
         </h4>
         <div className="flex flex-col gap-px flex-1 overflow-y-auto">
-          {filteredSprites.map((sprite, index) => (
-            <div key={sprite.id} draggable
+          {filteredSprites.map((sprite, index) => {
+            // Show group header when group changes
+            const prevGroup = index > 0 ? filteredSprites[index - 1].group : undefined;
+            const showGroupHeader = sprite.group && sprite.group !== prevGroup;
+            return (<React.Fragment key={sprite.id}>
+              {showGroupHeader && (
+                <div style={{
+                  padding: "3px 4px 1px",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 7,
+                  color: "var(--amber)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  borderTop: index > 0 ? "1px solid var(--border)" : "none",
+                  marginTop: index > 0 ? 2 : 0,
+                }}>
+                  <svg viewBox="0 0 16 16" width="8" height="8" style={{ display: "inline", verticalAlign: "-1px", marginRight: 3 }}>
+                    <path d="M1 3h6l2 2h6v9H1z" fill="currentColor" opacity="0.5" />
+                  </svg>
+                  {sprite.group}
+                </div>
+              )}
+            <div draggable
               onDragStart={(e) => { setDragIndex(index); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", ""); }}
               onDragOver={(e) => { if (dragIndex === null) return; e.preventDefault(); setDragOverIndex(index); }}
               onDrop={(e) => { e.preventDefault(); e.stopPropagation(); if (dragIndex !== null && dragIndex !== index) reorderSprites(dragIndex, index); setDragIndex(null); setDragOverIndex(null); }}
@@ -201,7 +289,8 @@ export function SpriteList() {
                 title="Delete"
               >×</button>
             </div>
-          ))}
+            </React.Fragment>);
+          })}
         </div>
       </div>
       {/* Context menu */}

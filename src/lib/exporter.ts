@@ -61,7 +61,7 @@ function addWatermark(canvas: HTMLCanvasElement): void {
 
 // ── Template context builder (adapted from free-tex-packer-core) ──
 
-function buildTemplateContext(bin: PackedBin, sprites: SpriteItem[], imageName: string) {
+function buildTemplateContext(bin: PackedBin, sprites: SpriteItem[], imageName: string, relatedPacks?: string[]) {
   const rects = bin.rects.map((r, index) => {
     const sprite = sprites.find((s) => s.id === r.spriteId);
     const name = sprite?.name ?? r.spriteId;
@@ -98,6 +98,13 @@ function buildTemplateContext(bin: PackedBin, sprites: SpriteItem[], imageName: 
     };
   });
 
+  // Build related_multi_packs data for multi-atlas exports
+  const hasRelatedPacks = relatedPacks && relatedPacks.length > 0;
+  const relatedPacksWithLast = relatedPacks?.map((p, i) => ({
+    ".": p,
+    last: i === relatedPacks.length - 1,
+  }));
+
   return {
     rects,
     config: {
@@ -111,13 +118,15 @@ function buildTemplateContext(bin: PackedBin, sprites: SpriteItem[], imageName: 
     },
     appInfo: { displayName: "SpriteForge", version: "1.0", url: "https://spriteforge.dev" },
     loadSteps: bin.rects.length + 2,
+    hasRelatedPacks,
+    relatedPacks: relatedPacksWithLast,
   };
 }
 
-function renderTemplate(bin: PackedBin, sprites: SpriteItem[], imageName: string, formatId: string): { content: string; ext: string } {
+function renderTemplate(bin: PackedBin, sprites: SpriteItem[], imageName: string, formatId: string, relatedPacks?: string[]): { content: string; ext: string } {
   const fmt = getFormatById(formatId);
   if (!fmt) return { content: "{}", ext: "json" };
-  const ctx = buildTemplateContext(bin, sprites, imageName);
+  const ctx = buildTemplateContext(bin, sprites, imageName, relatedPacks);
   const content = Mustache.render(fmt.template, ctx);
   return { content, ext: fmt.fileExt };
 }
@@ -166,13 +175,21 @@ export async function exportSpriteSheet(
     const JSZip = (await import("jszip")).default;
     const zip = new JSZip();
 
+    // Build page names for related_multi_packs cross-references
+    const pageNames = bins.map((_, i) => `${projectName}-${i}`);
+
     for (let i = 0; i < bins.length; i++) {
-      const suffix = `-${i}`;
-      const name = `${projectName}${suffix}`;
+      const name = pageNames[i];
       const canvas = renderBinToCanvas(bins[i], sprites);
       if (applyWatermark) addWatermark(canvas);
       const pngBlob = await canvasToBlob(canvas);
-      const { content, ext } = renderTemplate(bins[i], sprites, name, config.exportFormat);
+
+      // related_multi_packs: all other pages except the current one
+      const relatedPacks = pageNames
+        .filter((_, j) => j !== i)
+        .map((p) => `${p}.json`);
+
+      const { content, ext } = renderTemplate(bins[i], sprites, name, config.exportFormat, relatedPacks);
 
       zip.file(`${name}.png`, pngBlob);
       zip.file(`${name}.${ext}`, content);

@@ -104,6 +104,7 @@ export function useAutoPack() {
             border: config.border,
             pot: config.pot,
             allowRotation: config.allowRotation,
+            maxPages: config.maxPages,
           },
         });
       } catch {

@@ -15,6 +15,7 @@ interface PackerInput {
     border: number;
     pot: boolean;
     allowRotation: boolean;
+    maxPages: number;
   };
 }
 
@@ -39,7 +40,10 @@ self.onmessage = (e: MessageEvent<PackerInput>) => {
 
   packer.addArray(rects);
 
-  const bins = packer.bins.map((bin) => ({
+  const allBins = packer.bins;
+  const limit = config.maxPages > 0 ? config.maxPages : allBins.length;
+
+  const bins = allBins.slice(0, limit).map((bin, binIndex) => ({
     width: bin.width,
     height: bin.height,
     rects: bin.rects.map((r) => ({
@@ -49,6 +53,7 @@ self.onmessage = (e: MessageEvent<PackerInput>) => {
       width: r.width,
       height: r.height,
       rot: r.rot ?? false,
+      binIndex,
     })),
   }));
 

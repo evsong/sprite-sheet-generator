@@ -1,4 +1,5 @@
 import { useEditorStore } from "@/stores/editor-store";
+import { BinPageTabs } from "./BinPageTabs";
 import { useRef, useEffect, useCallback, useMemo } from "react";
 
 export function EditorCanvas() {
@@ -130,23 +131,67 @@ export function EditorCanvas() {
     }
   }, [bins, activeBin, sprites, selectedSpriteId, animation]);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation();
-    const files = e.dataTransfer.files;
-    if (!files.length) return;
+    const { scanDataTransfer, detectSequenceGroups } = await import("@/lib/folder-scanner");
+    const scanned = await scanDataTransfer(e.dataTransfer);
+    if (scanned.length === 0) return;
+
+    const currentTab = useEditorStore.getState().activeTab;
+    const importMode = currentTab === "assets" ? "atlas" as const : "sequence" as const;
+    const sequenceGroups = detectSequenceGroups(scanned);
+    const { setAnimationFrames, addSprites: add } = useEditorStore.getState();
+
     const newSprites: typeof sprites = [];
     let loaded = 0;
-    Array.from(files).forEach((file) => {
-      if (!file.type.startsWith("image/")) return;
+    const total = scanned.length;
+
+    for (const item of scanned) {
       const img = new Image();
-      img.onload = () => {
-        newSprites.push({ id: crypto.randomUUID(), name: file.name.replace(/\.[^.]+$/, ""), file, image: img, width: img.naturalWidth, height: img.naturalHeight, trimmed: false, isAi: false });
-        loaded++;
-        if (loaded === files.length) addSprites(newSprites);
-      };
-      img.src = URL.createObjectURL(file);
-    });
-  }, [addSprites]);
+      await new Promise<void>((resolve) => {
+        img.onload = () => {
+          newSprites.push({
+            id: crypto.randomUUID(),
+            name: item.file.name.replace(/\.[^.]+$/, ""),
+            file: item.file,
+            image: img,
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+            trimmed: false,
+            isAi: false,
+            mode: importMode,
+            group: item.group || undefined,
+          });
+          loaded++;
+          resolve();
+        };
+        img.onerror = () => { loaded++; resolve(); };
+        img.src = URL.createObjectURL(item.file);
+      });
+    }
+
+    if (newSprites.length > 0) {
+      add(newSprites);
+
+      // Auto-create animation sequences from folder groups
+      if (importMode === "sequence" && sequenceGroups.size > 0) {
+        // Build a map from filename to sprite id
+        const nameToId = new Map(newSprites.map((s) => [s.name, s.id]));
+        const allFrameIds: string[] = [];
+        for (const [, groupFiles] of sequenceGroups) {
+          for (const f of groupFiles) {
+            const name = f.file.name.replace(/\.[^.]+$/, "");
+            const id = nameToId.get(name);
+            if (id) allFrameIds.push(id);
+          }
+        }
+        if (allFrameIds.length > 0) {
+          const existing = useEditorStore.getState().animation.frames;
+          setAnimationFrames([...existing, ...allFrameIds]);
+        }
+      }
+    }
+  }, []);
 
   return (
     <div ref={containerRef} className="relative overflow-hidden flex flex-col flex-1"
@@ -163,6 +208,8 @@ export function EditorCanvas() {
           <span style={{ color: "#22C55E", fontWeight: 600 }}>{stats.density.toFixed(1)}%</span>
         </div>
       )}
+      {/* Multi-atlas page tabs */}
+      <BinPageTabs />
       {/* Checkerboard */}
       <div className="absolute inset-0" style={{
         backgroundSize: "16px 16px",

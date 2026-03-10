@@ -68,6 +68,7 @@ export function SettingsPanel() {
           <div style={S.row}><label style={S.label}>Density</label><span style={S.valGreen}>{stats.d.toFixed(1)}%</span></div>
           <div style={S.row}><label style={S.label}>Waste</label><span style={{ ...S.val, color: "var(--text-muted)" }}>{stats.waste.toFixed(1)}%</span></div>
           <div style={S.row}><label style={S.label}>POT</label><span style={stats.pot ? S.valGreen : S.val}>{stats.pot ? "Yes" : "No"}</span></div>
+          <div style={S.row}><label style={S.label}>Pages</label><span style={stats.draws > 1 ? S.valCyan : S.val}>{stats.draws}</span></div>
           <div style={S.row}><label style={S.label}>Draw Calls</label><span style={S.val}>{stats.draws}</span></div>
         </div>
       )}
@@ -97,6 +98,17 @@ export function SettingsPanel() {
         </div>
         <div style={S.row}><label style={S.label}>Trim Alpha</label>
           <Toggle on={config.trimTransparency} onClick={() => updateConfig({ trimTransparency: !config.trimTransparency })} />
+        </div>
+        <div style={S.row}><label style={S.label}>Max Pages</label>
+          <select style={S.select} value={config.maxPages}
+            onChange={(e) => updateConfig({ maxPages: parseInt(e.target.value) })}>
+            <option value={0}>Unlimited</option>
+            <option value={1}>1</option>
+            <option value={2}>2</option>
+            <option value={4}>4</option>
+            <option value={8}>8</option>
+            <option value={16}>16</option>
+          </select>
         </div>
       </div>
       {/* Export */}

@@ -24,6 +24,11 @@ export function StatusBar() {
     <div className="h-5 bg-[#080808] border-t border-[#1E1E1E] flex items-center px-3 gap-4 shrink-0">
       {stats ? (
         <>
+          {bins.length > 1 && (
+            <span className="font-[family-name:var(--font-mono)] text-[9px] text-[#06B6D4]">
+              Page {activeBin + 1}/{bins.length}
+            </span>
+          )}
           <span className="font-[family-name:var(--font-mono)] text-[9px] text-[#666]">
             {stats.width}×{stats.height}
           </span>

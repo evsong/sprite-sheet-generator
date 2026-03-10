@@ -25,7 +25,10 @@ export function packSprites(
 
   packer.addArray(rects);
 
-  return packer.bins.map((bin) => ({
+  const allBins = packer.bins;
+  const limit = config.maxPages > 0 ? config.maxPages : allBins.length;
+
+  return allBins.slice(0, limit).map((bin, binIndex) => ({
     width: bin.width,
     height: bin.height,
     rects: bin.rects.map((r) => ({
@@ -35,6 +38,7 @@ export function packSprites(
       width: r.width,
       height: r.height,
       rot: r.rot ?? false,
+      binIndex,
     })),
   }));
 }
