@@ -1,6 +1,8 @@
 import Mustache from "mustache";
 import type { PackedBin, SpriteItem } from "@/stores/editor-store";
 import { getFormatById } from "./export-formats";
+import type { CompressionConfig, CompressionResult } from "./compression";
+import { renderNormalMapBin } from "./normal-map";
 
 // ── Canvas rendering ──────────────────────────────────────────────
 
@@ -151,27 +153,53 @@ export function generateCodeSnippet(format: string, imageName: string): string {
   return snippets[format] ?? `// Load ${imageName}.json and ${imageName}.png`;
 }
 
+// ── Compression helper ────────────────────────────────────────────
+
+async function compressBinCanvas(
+  canvas: HTMLCanvasElement,
+  compression?: CompressionConfig,
+): Promise<{ blob: Blob; ext: string; result?: CompressionResult }> {
+  if (!compression || compression.format === "png" && !compression.rgba4444) {
+    // Default PNG path
+    const blob = await canvasToBlob(canvas);
+    return { blob, ext: "png" };
+  }
+
+  const { compressCanvas, getFormatExtension } = await import("./compression");
+  const result = await compressCanvas(canvas, compression);
+  return { blob: result.blob, ext: getFormatExtension(compression.format), result };
+}
+
 // ── Main export ───────────────────────────────────────────────────
+
+export interface ExportOptions {
+  watermark?: boolean;
+  normalMap?: boolean;
+  compression?: CompressionConfig;
+}
 
 export async function exportSpriteSheet(
   bins: PackedBin[],
   sprites: SpriteItem[],
   config: { exportFormat: string; trimTransparency: boolean },
   projectName = "spritesheet",
-  options?: { watermark?: boolean }
+  options?: ExportOptions,
 ): Promise<void> {
   if (bins.length === 0) return;
 
   const applyWatermark = options?.watermark ?? true;
+  const includeNormalMap = options?.normalMap ?? false;
+  const compression = options?.compression;
+  const hasNormalMaps = includeNormalMap && sprites.some((s) => s.normalMap);
 
-  if (bins.length === 1) {
+  if (bins.length === 1 && !hasNormalMaps) {
     const canvas = renderBinToCanvas(bins[0], sprites);
     if (applyWatermark) addWatermark(canvas);
-    const pngBlob = await canvasToBlob(canvas);
+    const { blob: imgBlob, ext: imgExt } = await compressBinCanvas(canvas, compression);
     const { content, ext } = renderTemplate(bins[0], sprites, projectName, config.exportFormat);
     const snippet = generateCodeSnippet(config.exportFormat, projectName);
 
-    downloadBlob(pngBlob, `${projectName}.png`);
+    downloadBlob(imgBlob, `${projectName}.${imgExt}`);
     downloadBlob(new Blob([content], { type: "text/plain" }), `${projectName}.${ext}`);
     downloadBlob(new Blob([snippet], { type: "text/plain" }), `${projectName}.usage.txt`);
   } else {
@@ -179,13 +207,17 @@ export async function exportSpriteSheet(
     const zip = new JSZip();
 
     // Build page names for related_multi_packs cross-references
-    const pageNames = bins.map((_, i) => `${projectName}-${i}`);
+    const pageNames = bins.map((_, i) =>
+      bins.length === 1 ? projectName : `${projectName}-${i}`,
+    );
 
     for (let i = 0; i < bins.length; i++) {
       const name = pageNames[i];
+
+      // Diffuse atlas
       const canvas = renderBinToCanvas(bins[i], sprites);
       if (applyWatermark) addWatermark(canvas);
-      const pngBlob = await canvasToBlob(canvas);
+      const { blob: imgBlob, ext: imgExt } = await compressBinCanvas(canvas, compression);
 
       // related_multi_packs: all other pages except the current one
       const relatedPacks = pageNames
@@ -194,8 +226,15 @@ export async function exportSpriteSheet(
 
       const { content, ext } = renderTemplate(bins[i], sprites, name, config.exportFormat, relatedPacks);
 
-      zip.file(`${name}.png`, pngBlob);
+      zip.file(`${name}.${imgExt}`, imgBlob);
       zip.file(`${name}.${ext}`, content);
+
+      // Normal map atlas (same layout, different images)
+      if (hasNormalMaps) {
+        const normalCanvas = renderNormalMapBin(bins[i], sprites);
+        const { blob: normalBlob, ext: normalExt } = await compressBinCanvas(normalCanvas, compression);
+        zip.file(`${name}_n.${normalExt}`, normalBlob);
+      }
     }
 
     zip.file(`${projectName}.usage.txt`, generateCodeSnippet(config.exportFormat, projectName));

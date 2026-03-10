@@ -95,6 +95,7 @@ export async function importProject(file: File): Promise<{
         name: s.name,
         file: null,
         image: img,
+        normalMap: null,
         width: s.width,
         height: s.height,
         trimmed: false,

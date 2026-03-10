@@ -21,7 +21,7 @@ const DEMO_SPRITES = [
   { name: "mage-cast-08", w: 64, h: 64, isAi: true, src: "/examples/fireball/frame-08.png", mode: "sequence" as const },
 ];
 
-type DemoSprite = { id: string; name: string; file: null; image: HTMLImageElement; width: number; height: number; trimmed: boolean; isAi: boolean; isAnimation?: boolean; mode?: "sequence" | "atlas"; pivot: { x: number; y: number } };
+type DemoSprite = { id: string; name: string; file: null; image: HTMLImageElement; normalMap: null; width: number; height: number; trimmed: boolean; isAi: boolean; isAnimation?: boolean; mode?: "sequence" | "atlas"; pivot: { x: number; y: number } };
 
 export function loadDemoSprites(): Promise<DemoSprite[]> {
   return Promise.all(
@@ -30,7 +30,7 @@ export function loadDemoSprites(): Promise<DemoSprite[]> {
         new Promise<DemoSprite>((resolve) => {
           const img = new Image();
           img.onload = () =>
-            resolve({ id: crypto.randomUUID(), name: s.name, file: null, image: img, width: s.w, height: s.h, trimmed: false, isAi: s.isAi, isAnimation: "isAnimation" in s ? true : undefined, mode: s.mode, pivot: { x: 0.5, y: 0.5 } });
+            resolve({ id: crypto.randomUUID(), name: s.name, file: null, image: img, normalMap: null, width: s.w, height: s.h, trimmed: false, isAi: s.isAi, isAnimation: "isAnimation" in s ? true : undefined, mode: s.mode, pivot: { x: 0.5, y: 0.5 } });
           img.src = s.src;
         })
     )

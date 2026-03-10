@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "input": "./sprites",
+  "output": "./output",
+  "name": "spritesheet",
+  "packing": {
+    "maxWidth": 2048,
+    "maxHeight": 2048,
+    "padding": 2,
+    "border": 0,
+    "pot": true,
+    "allowRotation": false,
+    "trimTransparency": true,
+    "exportFormat": "json",
+    "maxPages": 0
+  },
+  "normalMap": {
+    "enabled": false,
+    "autoGenerate": true,
+    "strength": 1.0
+  },
+  "compression": {
+    "format": "png",
+    "quality": 85,
+    "rgba4444": false,
+    "dithering": true
+  }
+}

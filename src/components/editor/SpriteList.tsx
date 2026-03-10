@@ -76,6 +76,7 @@ export function SpriteList() {
           name: file.name.replace(/\.[^.]+$/, ""),
           file,
           image: img,
+          normalMap: null,
           width: img.naturalWidth,
           height: img.naturalHeight,
           trimmed: false,
@@ -109,6 +110,7 @@ export function SpriteList() {
             name: item.file.name.replace(/\.[^.]+$/, ""),
             file: item.file,
             image: img,
+            normalMap: null,
             width: img.naturalWidth,
             height: img.naturalHeight,
             trimmed: false,
@@ -185,7 +187,7 @@ export function SpriteList() {
         const img = new Image();
         await new Promise<void>((resolve) => { img.onload = () => resolve(); img.src = data.images[i]; });
         const suffix = action === "upscale" ? "-2x" : `-${action}-${i + 1}`;
-        add([{ id: crypto.randomUUID(), name: `${sprite.name}${suffix}`, file: null, image: img, width: img.naturalWidth, height: img.naturalHeight, trimmed: false, isAi: true, pivot: { x: 0.5, y: 0.5 } }]);
+        add([{ id: crypto.randomUUID(), name: `${sprite.name}${suffix}`, file: null, image: img, normalMap: null, width: img.naturalWidth, height: img.naturalHeight, trimmed: false, isAi: true, pivot: { x: 0.5, y: 0.5 } }]);
         setAiProgress({ active: true, total, completed: i + 1, prompt: label });
       }
       setTimeout(() => setAiProgress(null), 2000);

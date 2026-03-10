@@ -64,6 +64,7 @@ export async function generateSpriteSheet(opts: GenerateOptions): Promise<Sprite
       name: `${mode === "atlas" ? "item" : "frame"}-${i + 1}`,
       file: null,
       image: resized,
+      normalMap: null,
       width: resized.naturalWidth,
       height: resized.naturalHeight,
       trimmed: false,

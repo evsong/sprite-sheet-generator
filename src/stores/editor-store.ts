@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { GenerationMode } from "@/lib/prompt-templates";
+import type { CompressionConfig } from "@/lib/compression";
 
 export interface PivotPoint {
   x: number; // 0..1 normalized (0.5 = center)
@@ -11,6 +12,8 @@ export interface SpriteItem {
   name: string;
   file: File | null;
   image: HTMLImageElement | null;
+  /** Auto-generated or paired normal map image */
+  normalMap: HTMLImageElement | null;
   width: number;
   height: number;
   trimmed: boolean;
@@ -112,6 +115,18 @@ interface EditorState {
   zoom: number;
   aiProgress: AiProgress | null;
   activeTab: EditorTab;
+
+  // Normal map settings
+  normalMapEnabled: boolean;
+  normalMapAutoGenerate: boolean;
+  normalMapStrength: number;
+  setNormalMapEnabled: (on: boolean) => void;
+  setNormalMapAutoGenerate: (on: boolean) => void;
+  setNormalMapStrength: (strength: number) => void;
+
+  // Compression settings
+  compressionConfig: CompressionConfig;
+  updateCompressionConfig: (config: Partial<CompressionConfig>) => void;
 
   // Pivot edit mode
   pivotEditMode: boolean;
@@ -218,6 +233,19 @@ export const useEditorStore = create<EditorState>((set) => ({
     sessionToken: typeof crypto !== "undefined" ? crypto.randomUUID() : "default",
     lastPushAt: null,
   },
+
+  // Normal map settings
+  normalMapEnabled: false,
+  normalMapAutoGenerate: false,
+  normalMapStrength: 1.0,
+  setNormalMapEnabled: (on) => set({ normalMapEnabled: on }),
+  setNormalMapAutoGenerate: (on) => set({ normalMapAutoGenerate: on }),
+  setNormalMapStrength: (strength) => set({ normalMapStrength: strength }),
+
+  // Compression settings
+  compressionConfig: { format: "png", quality: 85, rgba4444: false, dithering: true },
+  updateCompressionConfig: (config) =>
+    set((s) => ({ compressionConfig: { ...s.compressionConfig, ...config } })),
 
   // Pivot edit mode
   pivotEditMode: false,

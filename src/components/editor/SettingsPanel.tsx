@@ -1,11 +1,20 @@
 import { useEditorStore } from "@/stores/editor-store";
 import { getFormatGroups, isFormatFree } from "@/lib/export-formats";
 import { generateCodeSnippet } from "@/lib/exporter";
+import type { ExportOptions } from "@/lib/exporter";
 import { FILENAME_PRESETS } from "@/lib/filename-parser";
+import { formatBytes } from "@/lib/compression";
+import type { ImageFormat } from "@/lib/compression";
 import { useSession } from "next-auth/react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 
 const FORMAT_GROUPS = getFormatGroups();
+
+/** Simple tier check. Returns true for PRO/TEAM users. Does not block features. */
+function isPro(session: ReturnType<typeof useSession>["data"]): boolean {
+  const tier = (session?.user as Record<string, unknown> | undefined)?.tier as string ?? "FREE";
+  return tier === "PRO" || tier === "TEAM";
+}
 
 const S: Record<string, React.CSSProperties> = {
   section: { padding: "6px 8px", borderBottom: "1px solid var(--border)" },
@@ -50,10 +59,43 @@ export function SettingsPanel() {
   const setAutoTagOnImport = useEditorStore((s) => s.setAutoTagOnImport);
   const engineSync = useEditorStore((s) => s.engineSync);
   const updateEngineSync = useEditorStore((s) => s.updateEngineSync);
+
+  // Normal map state
+  const normalMapEnabled = useEditorStore((s) => s.normalMapEnabled);
+  const setNormalMapEnabled = useEditorStore((s) => s.setNormalMapEnabled);
+  const normalMapAutoGenerate = useEditorStore((s) => s.normalMapAutoGenerate);
+  const setNormalMapAutoGenerate = useEditorStore((s) => s.setNormalMapAutoGenerate);
+  const normalMapStrength = useEditorStore((s) => s.normalMapStrength);
+  const setNormalMapStrength = useEditorStore((s) => s.setNormalMapStrength);
+
+  // Compression state
+  const compressionConfig = useEditorStore((s) => s.compressionConfig);
+  const updateCompressionConfig = useEditorStore((s) => s.updateCompressionConfig);
+
   const { data: session } = useSession();
-  const tier = (session?.user as Record<string, unknown> | undefined)?.tier as string ?? "FREE";
-  const isPaid = tier === "PRO" || tier === "TEAM";
+  const isPaid = isPro(session);
   const [copied, setCopied] = useState(false);
+
+  // File size preview state
+  const [sizePreview, setSizePreview] = useState<{ original: number; compressed: number } | null>(null);
+
+  const estimateSize = useCallback(async () => {
+    const bin = bins[activeBin];
+    if (!bin) { setSizePreview(null); return; }
+    try {
+      const { renderBinToCanvas } = await import("@/lib/exporter");
+      const canvas = renderBinToCanvas(bin, sprites);
+      const { estimateCompressedSize } = await import("@/lib/compression");
+      const est = await estimateCompressedSize(canvas, compressionConfig);
+      setSizePreview({ original: est.originalSize, compressed: est.estimatedSize });
+    } catch {
+      setSizePreview(null);
+    }
+  }, [bins, activeBin, sprites, compressionConfig]);
+
+  useEffect(() => {
+    estimateSize();
+  }, [estimateSize]);
 
   const selectedSprite = sprites.find((s) => s.id === selectedSpriteId);
 
@@ -227,6 +269,102 @@ export function SettingsPanel() {
           </>
         )}
       </div>
+      {/* Normal Map */}
+      <div style={S.section}>
+        <h4 style={S.h4}>Normal Map</h4>
+        <div style={S.row}>
+          <label style={S.label}>Enable</label>
+          <Toggle on={normalMapEnabled} onClick={() => setNormalMapEnabled(!normalMapEnabled)} />
+        </div>
+        {normalMapEnabled && (
+          <>
+            <div style={S.row}>
+              <label style={S.label}>Auto-Generate</label>
+              <Toggle on={normalMapAutoGenerate} onClick={() => setNormalMapAutoGenerate(!normalMapAutoGenerate)} />
+            </div>
+            {normalMapAutoGenerate && (
+              <div style={S.row}>
+                <label style={S.label}>Strength</label>
+                <input
+                  type="range"
+                  min={0.5}
+                  max={5}
+                  step={0.1}
+                  value={normalMapStrength}
+                  onChange={(e) => setNormalMapStrength(Number(e.target.value))}
+                  style={{ width: 60, height: 12, accentColor: "var(--cyan)" }}
+                />
+                <span style={S.val}>{normalMapStrength.toFixed(1)}</span>
+              </div>
+            )}
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 7, color: "var(--text-muted)", lineHeight: 1.3 }}>
+              Pair files with _n/_normal/_nrm suffix, or auto-generate via Sobel.
+            </span>
+          </>
+        )}
+      </div>
+      {/* Compression */}
+      <div style={S.section}>
+        <h4 style={S.h4}>Compression</h4>
+        <div style={S.row}>
+          <label style={S.label}>Image Format</label>
+          <select
+            style={S.select}
+            value={compressionConfig.format}
+            onChange={(e) => updateCompressionConfig({ format: e.target.value as ImageFormat })}
+          >
+            <option value="png">PNG</option>
+            <option value="webp">WebP</option>
+            <option value="avif">AVIF</option>
+          </select>
+        </div>
+        {compressionConfig.format !== "png" && (
+          <div style={S.row}>
+            <label style={S.label}>Quality</label>
+            <input
+              type="range"
+              min={10}
+              max={100}
+              step={5}
+              value={compressionConfig.quality}
+              onChange={(e) => updateCompressionConfig({ quality: Number(e.target.value) })}
+              style={{ width: 60, height: 12, accentColor: "var(--cyan)" }}
+            />
+            <span style={S.val}>{compressionConfig.quality}%</span>
+          </div>
+        )}
+        <div style={S.row}>
+          <label style={S.label}>RGBA4444</label>
+          <Toggle on={compressionConfig.rgba4444} onClick={() => updateCompressionConfig({ rgba4444: !compressionConfig.rgba4444 })} />
+        </div>
+        {compressionConfig.rgba4444 && (
+          <div style={S.row}>
+            <label style={S.label}>Dithering</label>
+            <Toggle on={compressionConfig.dithering} onClick={() => updateCompressionConfig({ dithering: !compressionConfig.dithering })} />
+          </div>
+        )}
+        {/* File size preview */}
+        {sizePreview && (
+          <div style={{ marginTop: 4, padding: "3px 4px", background: "var(--bg)", border: "1px solid var(--border)" }}>
+            <div style={S.row}>
+              <label style={S.label}>Original</label>
+              <span style={S.val}>{formatBytes(sizePreview.original)}</span>
+            </div>
+            <div style={S.row}>
+              <label style={S.label}>Estimated</label>
+              <span style={S.valCyan}>{formatBytes(sizePreview.compressed)}</span>
+            </div>
+            {sizePreview.original > 0 && (
+              <div style={S.row}>
+                <label style={S.label}>Savings</label>
+                <span style={S.valGreen}>
+                  {Math.round((1 - sizePreview.compressed / sizePreview.original) * 100)}%
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
       {/* Export */}
       <div style={S.section}>
         <h4 style={S.h4}>Export</h4>
@@ -240,7 +378,17 @@ export function SettingsPanel() {
             ))}
           </select>
         </div>
-        <button onClick={() => { if (bins.length === 0) return; import("@/lib/exporter").then(({ exportSpriteSheet }) => { exportSpriteSheet(bins, sprites, config, "spritesheet", { watermark: !isPaid }); }); }}
+        <button onClick={() => {
+          if (bins.length === 0) return;
+          const exportOpts: ExportOptions = {
+            watermark: !isPaid,
+            normalMap: normalMapEnabled,
+            compression: (compressionConfig.format !== "png" || compressionConfig.rgba4444) ? compressionConfig : undefined,
+          };
+          import("@/lib/exporter").then(({ exportSpriteSheet }) => {
+            exportSpriteSheet(bins, sprites, config, "spritesheet", exportOpts);
+          });
+        }}
           disabled={bins.length === 0}
           style={{ width: "100%", height: 22, fontSize: 9, fontFamily: "var(--font-mono)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", background: "var(--cyan)", color: "#fff", border: "1px solid var(--cyan)", marginTop: 4, cursor: bins.length === 0 ? "not-allowed" : "pointer", opacity: bins.length === 0 ? 0.3 : 1 }}>
           Download .zip ↓

@@ -186,6 +186,7 @@ export function EditorCanvas() {
             name: item.file.name.replace(/\.[^.]+$/, ""),
             file: item.file,
             image: img,
+            normalMap: null,
             width: img.naturalWidth,
             height: img.naturalHeight,
             trimmed: false,
