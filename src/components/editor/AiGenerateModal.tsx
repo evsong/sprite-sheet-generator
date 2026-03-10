@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useEditorStore } from "@/stores/editor-store";
 import { PROMPT_TEMPLATES, type GenerationMode } from "@/lib/prompt-templates";
 import { generateSpriteSheet } from "@/lib/generate-sprite-sheet";
+import { mutateQuota } from "@/components/editor/AiQuotaIndicator";
 import { loadHistory, type HistoryEntry } from "@/lib/generation-history";
 
 const STYLES = [
@@ -75,6 +76,7 @@ export function AiGenerateModal({ open, onClose, defaultMode }: AiGenerateModalP
       });
 
       addSprites(sprites);
+      mutateQuota();
       if (mode === "sequence") {
         setAnimationFrames(sprites.map((s) => s.id));
       }

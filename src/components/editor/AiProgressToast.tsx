@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useEditorStore, type AiStage } from "@/stores/editor-store";
 import { generateSpriteSheet } from "@/lib/generate-sprite-sheet";
+import { mutateQuota } from "@/components/editor/AiQuotaIndicator";
 
 const STAGES: { key: AiStage; label: string; icon: string }[] = [
   { key: "generating", label: "Generate", icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" },
@@ -74,6 +75,7 @@ export function AiProgressToast() {
       });
 
       addSprites(sprites);
+      mutateQuota();
       if (lastAiParams.mode === "sequence") {
         setAnimationFrames(sprites.map((s) => s.id));
       }

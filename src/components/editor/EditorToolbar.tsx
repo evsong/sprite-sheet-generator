@@ -3,6 +3,7 @@ import { exportSpriteSheet } from "@/lib/exporter";
 import { exportProject, importProject } from "@/lib/project";
 import { CompareButton } from "./AtlasDiffViewer";
 import { SyncStatusIndicator } from "@/components/editor/SyncStatusIndicator";
+import { AiQuotaIndicator } from "@/components/editor/AiQuotaIndicator";
 import { useCallback, useRef, useMemo, useState } from "react";
 
 export function EditorToolbar() {
@@ -103,6 +104,7 @@ export function EditorToolbar() {
       {/* Right: stats + pivot + compare + export + save */}
       {/* Right: sync status + stats + export + save */}
       <div className="flex items-center gap-1.5">
+        <AiQuotaIndicator />
         <SyncStatusIndicator />
         <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-muted)" }}>
           {filteredCount} {isAssets ? "assets" : "frames"}{stats ? ` · ${stats.width}×${stats.height} · ${stats.density.toFixed(1)}%` : ""}

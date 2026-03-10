@@ -64,7 +64,7 @@ export function UserMenu() {
               className="block w-full text-left px-3 py-2 text-[11px] text-[#A0A0A0] hover:text-white hover:bg-[#1A1A1A] transition-colors duration-100 font-[family-name:var(--font-mono)]">
               Settings
             </Link>
-            <Link href="/settings" onClick={() => setOpen(false)}
+            <Link href="/settings#billing" onClick={() => setOpen(false)}
               className="block w-full text-left px-3 py-2 text-[11px] text-[#A0A0A0] hover:text-white hover:bg-[#1A1A1A] transition-colors duration-100 font-[family-name:var(--font-mono)] border-b border-[#1E1E1E]">
               Billing
             </Link>
