@@ -347,7 +347,7 @@ export async function downloadUnityPlugin(): Promise<void> {
     // Fallback: include a note that the file should be downloaded from GitHub
     folder.file(
       "SpriteForgeSync.cs",
-      "// Download the full SpriteForgeSync.cs from:\n// https://github.com/evsong/sprite-sheet-generator/tree/main/plugins/unity/SpriteForgeSync/\n",
+      "// Download the full SpriteForgeSync.cs from:\n// https://spriteforge.online/docs\n",
     );
   }
 

@@ -23,8 +23,8 @@ export default function DocsPage() {
             Documentation
           </h1>
           <p style={{ ...p, marginBottom: "32px" }}>
-            Everything you need to use SpriteForge effectively. For source code and contributions, visit the{" "}
-            <a href="https://github.com/evsong/sprite-sheet-generator" target="_blank" rel="noopener noreferrer" style={{ color: "var(--cyan)", textDecoration: "underline", textUnderlineOffset: "2px" }}>GitHub repository</a>.
+            Everything you need to use SpriteForge effectively. For questions or feedback, contact{" "}
+            <a href="mailto:support@spriteforge.online" style={{ color: "var(--cyan)", textDecoration: "underline", textUnderlineOffset: "2px" }}>support@spriteforge.online</a>.
           </p>
 
           {/* Getting Started */}
@@ -205,9 +205,7 @@ export default function DocsPage() {
           {/* Support */}
           <h2 style={h2}>Support</h2>
           <p style={p}>
-            For bug reports and feature requests, please open an issue on{" "}
-            <a href="https://github.com/evsong/sprite-sheet-generator/issues" target="_blank" rel="noopener noreferrer" style={{ color: "var(--cyan)", textDecoration: "underline", textUnderlineOffset: "2px" }}>GitHub</a>.
-            For account and billing questions, contact{" "}
+            For bug reports, feature requests, account and billing questions, contact{" "}
             <a href="mailto:support@spriteforge.online" style={{ color: "var(--cyan)", textDecoration: "underline", textUnderlineOffset: "2px" }}>support@spriteforge.online</a>.
           </p>
         </div>
