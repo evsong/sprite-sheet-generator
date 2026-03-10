@@ -13,7 +13,13 @@ export function EditorCanvas() {
   const selectSprite = useEditorStore((s) => s.selectSprite);
   const addSprites = useEditorStore((s) => s.addSprites);
   const animation = useEditorStore((s) => s.animation);
+  const activeTab = useEditorStore((s) => s.activeTab);
   const fitZoomApplied = useRef(false);
+
+  // Reset auto-fit when tab changes so zoom recalculates for new content
+  useEffect(() => {
+    fitZoomApplied.current = false;
+  }, [activeTab]);
 
   // Auto-fit zoom when bin changes or on first load
   useEffect(() => {

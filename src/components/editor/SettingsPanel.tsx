@@ -52,8 +52,8 @@ export function SettingsPanel() {
     const d = total > 0 ? (used / total) * 100 : 0;
     const vram = total * 4;
     const pot = (bin.width & (bin.width - 1)) === 0 && (bin.height & (bin.height - 1)) === 0;
-    return { w: bin.width, h: bin.height, sprites: sprites.length, d, waste: 100 - d, vram: vram < 1048576 ? `~${(vram/1024).toFixed(1)} KB` : `~${(vram/1048576).toFixed(1)} MB`, pot, draws: bins.length };
-  }, [bins, activeBin, sprites.length]);
+    return { w: bin.width, h: bin.height, sprites: bin.rects.length, d, waste: 100 - d, vram: vram < 1048576 ? `~${(vram/1024).toFixed(1)} KB` : `~${(vram/1048576).toFixed(1)} MB`, pot, draws: bins.length };
+  }, [bins, activeBin]);
 
   return (
     <div className="flex flex-col overflow-y-auto" style={{ background: "var(--bg-panel)", borderLeft: "1px solid var(--border)" }}>

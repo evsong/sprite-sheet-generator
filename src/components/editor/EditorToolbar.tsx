@@ -17,7 +17,7 @@ export function EditorToolbar() {
 
   const isAssets = activeTab === "assets";
   const filteredCount = sprites.filter((s) =>
-    isAssets ? s.mode === "atlas" : s.mode !== "atlas"
+    isAssets ? s.mode !== "sequence" : s.mode !== "atlas"
   ).length;
 
   const stats = useMemo(() => {

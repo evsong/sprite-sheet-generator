@@ -15,6 +15,7 @@ export function useAutoPack() {
   const sprites = useEditorStore((s) => s.sprites);
   const config = useEditorStore((s) => s.packingConfig);
   const setBins = useEditorStore((s) => s.setBins);
+  const activeTab = useEditorStore((s) => s.activeTab);
   const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
@@ -23,8 +24,18 @@ export function useAutoPack() {
       return;
     }
 
+    // Filter sprites by active tab: frames → sequence only, assets → atlas only
+    // Sprites without a mode (user-imported) show in both tabs
+    const filtered = sprites.filter((s) =>
+      activeTab === "frames" ? s.mode !== "atlas" : s.mode !== "sequence"
+    );
+    if (filtered.length === 0) {
+      setBins([]);
+      return;
+    }
+
     // Apply trimming if enabled
-    const processed = sprites.map((sprite) => {
+    const processed = filtered.map((sprite) => {
       if (config.trimTransparency && sprite.image && !sprite.trimmed) {
         const result = trimTransparency(sprite.image);
         if (result) {
@@ -42,9 +53,13 @@ export function useAutoPack() {
       return sprite;
     });
 
-    const trimChanged = processed.some((p, i) => p.trimmed !== sprites[i].trimmed);
+    const trimChanged = processed.some((p, i) => p.trimmed !== filtered[i].trimmed);
     if (trimChanged) {
-      useEditorStore.setState({ sprites: processed });
+      // Update only the filtered sprites back into the full array
+      const updatedMap = new Map(processed.map((p) => [p.id, p]));
+      useEditorStore.setState((s) => ({
+        sprites: s.sprites.map((sp) => updatedMap.get(sp.id) ?? sp),
+      }));
     }
 
     // Offload to worker for large sprite sets
@@ -106,5 +121,5 @@ export function useAutoPack() {
         workerRef.current = null;
       }
     };
-  }, [sprites, config, setBins]);
+  }, [sprites, config, setBins, activeTab]);
 }

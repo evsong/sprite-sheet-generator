@@ -201,7 +201,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   setZoom: (zoom) => set({ zoom }),
   setAiModalOpen: (open) => set({ aiModalOpen: open }),
   setAiProgress: (progress) => set({ aiProgress: progress }),
-  setActiveTab: (tab) => set({ activeTab: tab }),
+  setActiveTab: (tab) => set({ activeTab: tab, activeBin: 0 }),
   loadProject: (data) =>
     set({
       sprites: data.sprites,
