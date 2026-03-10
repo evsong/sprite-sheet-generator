@@ -21,19 +21,23 @@ export async function POST(req: NextRequest) {
     const frameCount = Math.min(count ?? itemCount ?? 1, 10);
     const mode: GenerationMode = rawMode === "atlas" ? "atlas" : "sequence";
 
-    // Auth + quota
+    // Auth + quota (login required for AI generation)
     const session = await auth();
     const userId = session?.user?.id;
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Sign in required to use AI generation" },
+        { status: 401 }
+      );
+    }
     const tier = (session?.user as Record<string, unknown> | undefined)?.tier as string ?? "FREE";
 
-    if (userId) {
-      const quota = await checkQuota(userId, tier);
-      if (!quota.allowed) {
-        return NextResponse.json(
-          { error: `Daily limit reached (${quota.used}/${quota.limit}). Upgrade for more.` },
-          { status: 429 }
-        );
-      }
+    const quota = await checkQuota(userId, tier);
+    if (!quota.allowed) {
+      return NextResponse.json(
+        { error: `Daily limit reached (${quota.used}/${quota.limit}). Upgrade for more.` },
+        { status: 429 }
+      );
     }
 
     const systemPrompt = buildSystemPrompt(prompt, frameCount, style || "pixel art", mode);

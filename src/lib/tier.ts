@@ -14,7 +14,7 @@ export interface TierLimits {
 
 export const TIER_LIMITS: Record<TierName, TierLimits> = {
   FREE: {
-    aiGenerationsPerDay: 3,
+    aiGenerationsPerDay: 1,
     maxSpritesPerSheet: 64,
     exportFormatsAll: false,
     engineSync: false,
@@ -23,7 +23,7 @@ export const TIER_LIMITS: Record<TierName, TierLimits> = {
     codeSnippets: false,
   },
   PRO: {
-    aiGenerationsPerDay: 50,
+    aiGenerationsPerDay: 10,
     maxSpritesPerSheet: Infinity,
     exportFormatsAll: true,
     engineSync: true,
@@ -32,7 +32,7 @@ export const TIER_LIMITS: Record<TierName, TierLimits> = {
     codeSnippets: true,
   },
   TEAM: {
-    aiGenerationsPerDay: Infinity,
+    aiGenerationsPerDay: 500,
     maxSpritesPerSheet: Infinity,
     exportFormatsAll: true,
     engineSync: true,

@@ -12,7 +12,7 @@ const tiers = [
     features: [
       { text: "Up to 64 sprites per sheet", off: false },
       { text: "3 export formats (JSON, CSS)", off: false },
-      { text: "3 AI generations / day", off: false },
+      { text: "1 AI generation / day", off: false },
       { text: "Animation preview", off: false },
       { text: "PNG export only", off: false },
       { text: "Engine sync / normal maps", off: true },
@@ -30,7 +30,7 @@ const tiers = [
     features: [
       { text: "Unlimited sprites per sheet", off: false },
       { text: "15+ export formats + engine sync", off: false },
-      { text: "50 AI generations / day", off: false },
+      { text: "10 AI generations / day", off: false },
       { text: "WebP / AVIF compression", off: false },
       { text: "Normal maps + code snippets", off: false },
       { text: "Email support", off: false },
@@ -41,14 +41,14 @@ const tiers = [
   },
   {
     name: "Team",
-    price: "$29.99",
+    price: "$299",
     period: "/month",
     tier: "TEAM",
     features: [
       { text: "Everything in Pro", off: false },
       { text: "5 team seats included", off: false },
       { text: "Shared asset library", off: false },
-      { text: "Unlimited AI generations", off: false },
+      { text: "500 AI generations / day", off: false },
       { text: "API access", off: false },
       { text: "Priority support + Slack", off: false },
     ],

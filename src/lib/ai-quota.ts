@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
 
 const DAILY_LIMITS: Record<string, number> = {
-  FREE: 3,
-  PRO: 50,
-  TEAM: Infinity,
+  FREE: 1,
+  PRO: 10,
+  TEAM: 500,
 };
 
 export async function checkQuota(userId: string, tier: string): Promise<{ allowed: boolean; used: number; limit: number }> {

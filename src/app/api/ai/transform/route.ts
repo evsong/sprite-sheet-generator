@@ -57,17 +57,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "AI not configured" }, { status: 503 });
     }
 
-    // Auth + quota
+    // Auth + quota (login required for AI generation)
     const session = await auth();
     const userId = session?.user?.id;
+    if (!userId) {
+      return NextResponse.json({ error: "Sign in required to use AI generation" }, { status: 401 });
+    }
     const tier = (session?.user as Record<string, unknown> | undefined)?.tier as string ?? "FREE";
     const frameCount = Math.min(count || 1, 8);
 
-    if (userId) {
-      const quota = await checkQuota(userId, tier);
-      if (!quota.allowed) {
-        return NextResponse.json({ error: `Daily limit reached (${quota.used}/${quota.limit})` }, { status: 429 });
-      }
+    const quota = await checkQuota(userId, tier);
+    if (!quota.allowed) {
+      return NextResponse.json({ error: `Daily limit reached (${quota.used}/${quota.limit})` }, { status: 429 });
     }
 
     const raw = imageBase64.replace(/^data:image\/\w+;base64,/, "");
