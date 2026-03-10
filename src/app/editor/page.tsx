@@ -14,6 +14,7 @@ import { AtlasDiffViewer } from "@/components/editor/AtlasDiffViewer";
 import { useAutoPack } from "@/hooks/use-auto-pack";
 import { useAnimationPlayback } from "@/hooks/use-animation-playback";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { useEngineSync } from "@/hooks/use-engine-sync";
 import { useEditorStore } from "@/stores/editor-store";
 import { loadDemoSprites } from "@/lib/demo-sprites";
 import { useEffect, useRef } from "react";
@@ -23,6 +24,7 @@ export default function EditorPage() {
   useAutoPack();
   useAnimationPlayback();
   useKeyboardShortcuts();
+  useEngineSync();
 
   const aiModalOpen = useEditorStore((s) => s.aiModalOpen);
   const setAiModalOpen = useEditorStore((s) => s.setAiModalOpen);
