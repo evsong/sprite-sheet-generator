@@ -60,7 +60,7 @@ export default function DocsPage() {
           </p>
           <h3 style={h3}>Quotas</h3>
           <p style={p}>
-            Free accounts get 3 AI generations per day. Pro accounts get 50 per day. Team accounts have unlimited generations.
+            Free accounts get 1 AI generation per day. Pro accounts get 10 per day. Team accounts get 500 per day.
           </p>
 
           {/* Packing */}
@@ -136,21 +136,69 @@ export default function DocsPage() {
 
           {/* Keyboard Shortcuts */}
           <h2 style={h2}>Keyboard Shortcuts</h2>
+          <p style={p}>
+            All shortcuts use <span style={code}>Cmd</span> on macOS and <span style={code}>Ctrl</span> on Windows/Linux.
+          </p>
+
+          <h3 style={h3}>General</h3>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", lineHeight: 2 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--border)", padding: "2px 0" }}>
+              <span>Undo</span><span style={{ color: "var(--text-muted)" }}>Cmd/Ctrl + Z</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--border)", padding: "2px 0" }}>
+              <span>Redo</span><span style={{ color: "var(--text-muted)" }}>Cmd/Ctrl + Shift + Z</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--border)", padding: "2px 0" }}>
+              <span>Deselect / Close modal</span><span style={{ color: "var(--text-muted)" }}>Escape</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "2px 0" }}>
+              <span>Export / Download .zip</span><span style={{ color: "var(--text-muted)" }}>Cmd/Ctrl + E</span>
+            </div>
+          </div>
+
+          <h3 style={h3}>Sprites</h3>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", lineHeight: 2 }}>
             <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--border)", padding: "2px 0" }}>
               <span>Delete selected sprite</span><span style={{ color: "var(--text-muted)" }}>Delete / Backspace</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--border)", padding: "2px 0" }}>
-              <span>Select all</span><span style={{ color: "var(--text-muted)" }}>Ctrl/Cmd + A</span>
+              <span>Duplicate selected sprite</span><span style={{ color: "var(--text-muted)" }}>Cmd/Ctrl + D</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--border)", padding: "2px 0" }}>
-              <span>Undo</span><span style={{ color: "var(--text-muted)" }}>Ctrl/Cmd + Z</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--border)", padding: "2px 0" }}>
-              <span>Redo</span><span style={{ color: "var(--text-muted)" }}>Ctrl/Cmd + Shift + Z</span>
+              <span>Add all sprites to animation</span><span style={{ color: "var(--text-muted)" }}>Cmd/Ctrl + A</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "2px 0" }}>
-              <span>Export</span><span style={{ color: "var(--text-muted)" }}>Ctrl/Cmd + E</span>
+              <span>Add selected sprite to animation</span><span style={{ color: "var(--text-muted)" }}>Cmd/Ctrl + Shift + A</span>
+            </div>
+          </div>
+
+          <h3 style={h3}>Animation</h3>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", lineHeight: 2 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--border)", padding: "2px 0" }}>
+              <span>Play / Pause animation</span><span style={{ color: "var(--text-muted)" }}>Space</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "2px 0" }}>
+              <span>Toggle onion skin</span><span style={{ color: "var(--text-muted)" }}>O</span>
+            </div>
+          </div>
+
+          <h3 style={h3}>View</h3>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", lineHeight: 2 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--border)", padding: "2px 0" }}>
+              <span>Zoom in</span><span style={{ color: "var(--text-muted)" }}>Cmd/Ctrl + =</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--border)", padding: "2px 0" }}>
+              <span>Zoom out</span><span style={{ color: "var(--text-muted)" }}>Cmd/Ctrl + -</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "2px 0" }}>
+              <span>Reset zoom to 100%</span><span style={{ color: "var(--text-muted)" }}>Cmd/Ctrl + 0</span>
+            </div>
+          </div>
+
+          <h3 style={h3}>Engine Sync</h3>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", lineHeight: 2 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "2px 0" }}>
+              <span>Manual push to engine</span><span style={{ color: "var(--text-muted)" }}>Cmd/Ctrl + Shift + S</span>
             </div>
           </div>
 

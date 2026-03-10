@@ -12,12 +12,54 @@ export function useKeyboardShortcuts() {
       const meta = e.metaKey || e.ctrlKey;
       const state = useEditorStore.getState();
       const { selectedSpriteId, sprites } = state;
+      const isInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
 
       // Delete selected sprite
       if (e.key === "Backspace" || e.key === "Delete") {
-        if (selectedSpriteId && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+        if (selectedSpriteId && !isInput) {
           e.preventDefault();
           state.removeSprite(selectedSpriteId);
+        }
+        return;
+      }
+
+      // ⌘Z — Undo
+      if (meta && !e.shiftKey && e.key === "z") {
+        e.preventDefault();
+        useEditorStore.temporal.getState().undo();
+        return;
+      }
+
+      // ⌘⇧Z — Redo
+      if (meta && e.shiftKey && (e.key === "z" || e.key === "Z")) {
+        e.preventDefault();
+        useEditorStore.temporal.getState().redo();
+        return;
+      }
+
+      // ⌘E — Export / Download .zip
+      if (meta && e.key === "e") {
+        e.preventDefault();
+        const { bins, packingConfig } = state;
+        if (bins.length === 0) return;
+        import("@/lib/exporter").then(({ exportSpriteSheet }) => {
+          exportSpriteSheet(bins, sprites, packingConfig);
+        });
+        return;
+      }
+
+      // ⌘A — Add all sequence sprites to animation frames
+      if (meta && !e.shiftKey && e.key === "a") {
+        e.preventDefault();
+        const existingFrames = new Set(state.animation.frames);
+        const sequenceSprites = sprites.filter(
+          (s) => s.mode !== "atlas" && !existingFrames.has(s.id),
+        );
+        if (sequenceSprites.length > 0) {
+          state.setAnimationFrames([
+            ...state.animation.frames,
+            ...sequenceSprites.map((s) => s.id),
+          ]);
         }
         return;
       }
@@ -36,7 +78,7 @@ export function useKeyboardShortcuts() {
         return;
       }
 
-      // ⌘A — Select all (add all to animation)
+      // ⌘⇧A — Add selected sprite to animation
       if (meta && e.shiftKey && e.key === "a") {
         e.preventDefault();
         if (selectedSpriteId) {
@@ -53,7 +95,7 @@ export function useKeyboardShortcuts() {
       }
 
       // Space — Toggle animation playback
-      if (e.key === " " && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      if (e.key === " " && !isInput) {
         e.preventDefault();
         state.togglePlaying();
         return;
@@ -79,7 +121,7 @@ export function useKeyboardShortcuts() {
       }
 
       // O — Toggle onion skin
-      if (e.key === "o" && !meta && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      if (e.key === "o" && !meta && !isInput) {
         e.preventDefault();
         state.toggleOnionSkin();
         return;

@@ -1,4 +1,4 @@
-import { useEditorStore } from "@/stores/editor-store";
+import { useEditorStore, useTemporalStore } from "@/stores/editor-store";
 import { exportSpriteSheet } from "@/lib/exporter";
 import { exportProject, importProject } from "@/lib/project";
 import { CompareButton } from "./AtlasDiffViewer";
@@ -18,6 +18,10 @@ export function EditorToolbar() {
   const setPivotEditMode = useEditorStore((s) => s.setPivotEditMode);
   const openFileRef = useRef<HTMLInputElement>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const undo = useTemporalStore((s) => s.undo);
+  const redo = useTemporalStore((s) => s.redo);
+  const canUndo = useTemporalStore((s) => s.pastStates.length > 0);
+  const canRedo = useTemporalStore((s) => s.futureStates.length > 0);
 
   const isAssets = activeTab === "assets";
   const filteredCount = sprites.filter((s) =>
@@ -78,16 +82,19 @@ export function EditorToolbar() {
         </span>
         <button
           title="Undo (⌘Z)"
-          onClick={handleNew}
+          onClick={() => undo()}
+          disabled={!canUndo}
           className="flex items-center justify-center hover:border-[var(--text)] hover:text-[var(--text)] transition-all duration-100"
-          style={{ width: 22, height: 22, border: "1px solid var(--border)", color: "var(--text-dim)", fontSize: 10 }}
+          style={{ width: 22, height: 22, border: "1px solid var(--border)", color: "var(--text-dim)", fontSize: 10, opacity: canUndo ? 1 : 0.3, cursor: canUndo ? "pointer" : "default" }}
         >
           ↩
         </button>
         <button
           title="Redo (⌘⇧Z)"
+          onClick={() => redo()}
+          disabled={!canRedo}
           className="flex items-center justify-center hover:border-[var(--text)] hover:text-[var(--text)] transition-all duration-100"
-          style={{ width: 22, height: 22, border: "1px solid var(--border)", color: "var(--text-dim)", fontSize: 10 }}
+          style={{ width: 22, height: 22, border: "1px solid var(--border)", color: "var(--text-dim)", fontSize: 10, opacity: canRedo ? 1 : 0.3, cursor: canRedo ? "pointer" : "default" }}
         >
           ↪
         </button>

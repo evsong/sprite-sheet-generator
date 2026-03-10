@@ -1,4 +1,8 @@
 import { create } from "zustand";
+import { temporal } from "zundo";
+import type { TemporalState } from "zundo";
+import type { StoreApi } from "zustand";
+import { useStore } from "zustand";
 import type { GenerationMode } from "@/lib/prompt-templates";
 import type { CompressionConfig } from "@/lib/compression";
 
@@ -196,7 +200,15 @@ const DEFAULT_DIFF_STATE: DiffState = {
   mismatchCount: 0,
 };
 
-export const useEditorStore = create<EditorState>((set) => ({
+// Type for the partialized state tracked by undo/redo
+interface TrackedState {
+  sprites: SpriteItem[];
+  bins: PackedBin[];
+  animationFrames: string[];
+  packingConfig: PackingConfig;
+}
+
+export const useEditorStore = create<EditorState>()(temporal((set) => ({
   sprites: [],
   bins: [],
   activeBin: 0,
@@ -343,7 +355,22 @@ export const useEditorStore = create<EditorState>((set) => ({
       activeBin: 0,
       selectedSpriteId: null,
     }),
+}), {
+  partialize: (state): TrackedState => ({
+    sprites: state.sprites,
+    bins: state.bins,
+    animationFrames: state.animation.frames,
+    packingConfig: state.packingConfig,
+  }),
+  limit: 50,
+  equality: (pastState, currentState) =>
+    JSON.stringify(pastState) === JSON.stringify(currentState),
 }));
+
+// Temporal store hook for undo/redo access in React components
+export const useTemporalStore = <T>(
+  selector: (state: TemporalState<TrackedState>) => T,
+) => useStore(useEditorStore.temporal as unknown as StoreApi<TemporalState<TrackedState>>, selector);
 
 // Expose store for dev tools
 if (typeof window !== "undefined") {
