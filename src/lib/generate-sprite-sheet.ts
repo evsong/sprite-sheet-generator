@@ -69,6 +69,7 @@ export async function generateSpriteSheet(opts: GenerateOptions): Promise<Sprite
       trimmed: false,
       isAi: true,
       mode,
+      pivot: { x: 0.5, y: 0.5 },
     });
   }
 

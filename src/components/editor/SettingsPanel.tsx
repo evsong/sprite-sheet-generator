@@ -1,6 +1,7 @@
 import { useEditorStore } from "@/stores/editor-store";
 import { getFormatGroups, isFormatFree } from "@/lib/export-formats";
 import { generateCodeSnippet } from "@/lib/exporter";
+import { FILENAME_PRESETS } from "@/lib/filename-parser";
 import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 
@@ -39,10 +40,20 @@ export function SettingsPanel() {
   const bins = useEditorStore((s) => s.bins);
   const activeBin = useEditorStore((s) => s.activeBin);
   const sprites = useEditorStore((s) => s.sprites);
+  const pivotEditMode = useEditorStore((s) => s.pivotEditMode);
+  const setPivotEditMode = useEditorStore((s) => s.setPivotEditMode);
+  const selectedSpriteId = useEditorStore((s) => s.selectedSpriteId);
+  const updateSprite = useEditorStore((s) => s.updateSprite);
+  const filenamePattern = useEditorStore((s) => s.filenamePattern);
+  const setFilenamePattern = useEditorStore((s) => s.setFilenamePattern);
+  const autoTagOnImport = useEditorStore((s) => s.autoTagOnImport);
+  const setAutoTagOnImport = useEditorStore((s) => s.setAutoTagOnImport);
   const { data: session } = useSession();
   const tier = (session?.user as Record<string, unknown> | undefined)?.tier as string ?? "FREE";
   const isPaid = tier === "PRO" || tier === "TEAM";
   const [copied, setCopied] = useState(false);
+
+  const selectedSprite = sprites.find((s) => s.id === selectedSpriteId);
 
   const stats = useMemo(() => {
     const bin = bins[activeBin];
@@ -110,6 +121,109 @@ export function SettingsPanel() {
             <option value={16}>16</option>
           </select>
         </div>
+      </div>
+      {/* Pivot */}
+      <div style={S.section}>
+        <h4 style={S.h4}>Pivot Point</h4>
+        <div style={S.row}>
+          <label style={S.label}>Edit Mode</label>
+          <Toggle on={pivotEditMode} onClick={() => setPivotEditMode(!pivotEditMode)} />
+        </div>
+        {pivotEditMode && selectedSprite && (
+          <>
+            <div style={S.row}>
+              <label style={S.label}>X</label>
+              <input
+                type="number"
+                min={0}
+                max={1}
+                step={0.01}
+                value={selectedSprite.pivot.x}
+                onChange={(e) => updateSprite(selectedSprite.id, { pivot: { ...selectedSprite.pivot, x: Number(e.target.value) } })}
+                style={{ ...S.select, width: 56 }}
+              />
+            </div>
+            <div style={S.row}>
+              <label style={S.label}>Y</label>
+              <input
+                type="number"
+                min={0}
+                max={1}
+                step={0.01}
+                value={selectedSprite.pivot.y}
+                onChange={(e) => updateSprite(selectedSprite.id, { pivot: { ...selectedSprite.pivot, y: Number(e.target.value) } })}
+                style={{ ...S.select, width: 56 }}
+              />
+            </div>
+            <div className="flex gap-1 mt-1">
+              {([
+                ["TL", 0, 0], ["TC", 0.5, 0], ["TR", 1, 0],
+                ["ML", 0, 0.5], ["C", 0.5, 0.5], ["MR", 1, 0.5],
+                ["BL", 0, 1], ["BC", 0.5, 1], ["BR", 1, 1],
+              ] as [string, number, number][]).map(([label, px, py]) => (
+                <button
+                  key={label}
+                  onClick={() => updateSprite(selectedSprite.id, { pivot: { x: px, y: py } })}
+                  style={{
+                    width: 20,
+                    height: 16,
+                    fontSize: 6,
+                    fontFamily: "var(--font-mono)",
+                    color: selectedSprite.pivot.x === px && selectedSprite.pivot.y === py ? "var(--cyan)" : "var(--text-muted)",
+                    background: selectedSprite.pivot.x === px && selectedSprite.pivot.y === py ? "rgba(6,182,212,0.1)" : "var(--bg)",
+                    border: "1px solid var(--border)",
+                    cursor: "pointer",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+        {pivotEditMode && !selectedSprite && (
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 8, color: "var(--text-muted)" }}>
+            Select a sprite to edit its pivot
+          </span>
+        )}
+      </div>
+      {/* Filename Pattern */}
+      <div style={S.section}>
+        <h4 style={S.h4}>Auto-Tag</h4>
+        <div style={S.row}>
+          <label style={S.label}>On Import</label>
+          <Toggle on={autoTagOnImport} onClick={() => setAutoTagOnImport(!autoTagOnImport)} />
+        </div>
+        {autoTagOnImport && (
+          <>
+            <div style={{ marginBottom: 4 }}>
+              <select
+                style={{ ...S.select, width: "100%", marginBottom: 3 }}
+                value={FILENAME_PRESETS.find((p) => p.pattern === filenamePattern) ? filenamePattern : ""}
+                onChange={(e) => { if (e.target.value) setFilenamePattern(e.target.value); }}
+              >
+                {FILENAME_PRESETS.map((p) => (
+                  <option key={p.label} value={p.pattern}>{p.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <input
+                type="text"
+                value={filenamePattern}
+                onChange={(e) => setFilenamePattern(e.target.value)}
+                placeholder="Regex with named groups..."
+                style={{
+                  ...S.select,
+                  width: "100%",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 8,
+                }}
+              />
+            </div>
+          </>
+        )}
       </div>
       {/* Export */}
       <div style={S.section}>

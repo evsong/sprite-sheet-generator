@@ -7,6 +7,7 @@ export function AnimationPreview() {
   const sprites = useEditorStore((s) => s.sprites);
   const animation = useEditorStore((s) => s.animation);
   const selectedSpriteId = useEditorStore((s) => s.selectedSpriteId);
+  const pivotEditMode = useEditorStore((s) => s.pivotEditMode);
 
   // When not playing and a sprite is selected, show it; otherwise show current animation frame
   const selectedSprite = selectedSpriteId ? sprites.find((s) => s.id === selectedSpriteId && s.mode !== "atlas") : null;
@@ -88,7 +89,32 @@ export function AnimationPreview() {
     ctx.lineWidth = 1;
     ctx.strokeRect(drawX, drawY, drawW, drawH);
 
-  }, [currentSprite, animation, sprites, selectedSpriteId]);
+    // Draw pivot crosshair
+    if (pivotEditMode && currentSprite.pivot) {
+      const px = drawX + currentSprite.pivot.x * drawW;
+      const py = drawY + currentSprite.pivot.y * drawH;
+      ctx.save();
+      ctx.strokeStyle = "#06B6D4";
+      ctx.fillStyle = "#06B6D4";
+      ctx.lineWidth = 1;
+      const sz = 8;
+      ctx.beginPath();
+      ctx.moveTo(px - sz, py); ctx.lineTo(px + sz, py);
+      ctx.moveTo(px, py - sz); ctx.lineTo(px, py + sz);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(px, py, 2, 0, Math.PI * 2);
+      ctx.fill();
+      // Label
+      ctx.font = "8px 'JetBrains Mono', monospace";
+      ctx.fillText(
+        `${currentSprite.pivot.x.toFixed(2)}, ${currentSprite.pivot.y.toFixed(2)}`,
+        px + 10, py - 4,
+      );
+      ctx.restore();
+    }
+
+  }, [currentSprite, animation, sprites, selectedSpriteId, pivotEditMode]);
 
   return (
     <div

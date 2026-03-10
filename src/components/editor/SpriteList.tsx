@@ -1,6 +1,9 @@
 import { useEditorStore, SpriteItem } from "@/stores/editor-store";
 import { removeBackground } from "@/lib/bg-removal";
+
 import React, { useCallback, useRef, useState } from "react";
+
+import { parseFilename } from "@/lib/filename-parser";
 
 function CtxIcon({ d, type }: { d: string; type?: string }) {
   if (type === "dup") return <svg viewBox="0 0 16 16" width="11" height="11"><rect x="1" y="1" width="6" height="6" fill="currentColor" opacity="0.6"/><rect x="9" y="1" width="6" height="6" fill="currentColor" opacity="0.4"/><rect x="1" y="9" width="6" height="6" fill="currentColor" opacity="0.3"/></svg>;
@@ -57,14 +60,30 @@ export function SpriteList() {
   const handleFileUpload = useCallback((files: FileList) => {
     const imageFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
     if (imageFiles.length === 0) return;
-    const currentTab = useEditorStore.getState().activeTab;
+    const state = useEditorStore.getState();
+    const currentTab = state.activeTab;
     const importMode = currentTab === "assets" ? "atlas" as const : "sequence" as const;
+    const doAutoTag = state.autoTagOnImport;
+    const pattern = state.filenamePattern;
     const newSprites: SpriteItem[] = [];
     let loaded = 0;
     imageFiles.forEach((file) => {
       const img = new Image();
       img.onload = () => {
-        newSprites.push({ id: crypto.randomUUID(), name: file.name.replace(/\.[^.]+$/, ""), file, image: img, width: img.naturalWidth, height: img.naturalHeight, trimmed: false, isAi: false, mode: importMode });
+        const parsed = doAutoTag ? parseFilename(file.name, pattern) : null;
+        newSprites.push({
+          id: crypto.randomUUID(),
+          name: file.name.replace(/\.[^.]+$/, ""),
+          file,
+          image: img,
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+          trimmed: false,
+          isAi: false,
+          mode: importMode,
+          pivot: { x: 0.5, y: 0.5 },
+          tags: parsed?.tags,
+        });
         loaded++;
         if (loaded === imageFiles.length) addSprites(newSprites);
       };
@@ -95,7 +114,7 @@ export function SpriteList() {
             trimmed: false,
             isAi: false,
             mode: importMode,
-            group: item.group || undefined,
+            group: item.group || undefined, pivot: { x: 0.5, y: 0.5 },
           });
           resolve();
         };
@@ -166,7 +185,7 @@ export function SpriteList() {
         const img = new Image();
         await new Promise<void>((resolve) => { img.onload = () => resolve(); img.src = data.images[i]; });
         const suffix = action === "upscale" ? "-2x" : `-${action}-${i + 1}`;
-        add([{ id: crypto.randomUUID(), name: `${sprite.name}${suffix}`, file: null, image: img, width: img.naturalWidth, height: img.naturalHeight, trimmed: false, isAi: true }]);
+        add([{ id: crypto.randomUUID(), name: `${sprite.name}${suffix}`, file: null, image: img, width: img.naturalWidth, height: img.naturalHeight, trimmed: false, isAi: true, pivot: { x: 0.5, y: 0.5 } }]);
         setAiProgress({ active: true, total, completed: i + 1, prompt: label });
       }
       setTimeout(() => setAiProgress(null), 2000);
@@ -281,6 +300,11 @@ export function SpriteList() {
               </div>
               <span className="truncate">{sprite.name}.png</span>
               {sprite.isAi && <span style={{ fontFamily: "var(--font-mono)", fontSize: 6, color: "var(--amber)", background: "rgba(245,158,11,0.12)", padding: "0 3px", lineHeight: "1.5", letterSpacing: "0.05em", flexShrink: 0 }}>AI</span>}
+              {sprite.tags && Object.keys(sprite.tags).length > 0 && (
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 6, color: "#8B5CF6", background: "rgba(139,92,246,0.12)", padding: "0 3px", lineHeight: "1.5", letterSpacing: "0.05em", flexShrink: 0 }}>
+                  {Object.values(sprite.tags).join("/")}
+                </span>
+              )}
               <span className="ml-auto shrink-0" style={{ color: "var(--text-muted)", fontSize: 8 }}>{sprite.width}×{sprite.height}</span>
               <button
                 onClick={(e) => { e.stopPropagation(); removeSprite(sprite.id); }}

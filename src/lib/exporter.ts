@@ -80,6 +80,8 @@ function buildTemplateContext(bin: PackedBin, sprites: SpriteItem[], imageName: 
     const escapedName = name.replace(/%/g, "%25").replace(/#/g, "%23")
       .replace(/:/g, "%3A").replace(/;/g, "%3B").replace(/\\/g, "-").replace(/\//g, "-");
 
+    const pivot = sprite?.pivot ?? { x: 0.5, y: 0.5 };
+
     return {
       name,
       cssName: name.replace(/[^a-zA-Z0-9_-]/g, "-"),
@@ -89,6 +91,7 @@ function buildTemplateContext(bin: PackedBin, sprites: SpriteItem[], imageName: 
       sourceSize: ss,
       rotated: r.rot,
       trimmed,
+      pivot: { x: pivot.x, y: pivot.y },
       first: index === 0,
       last: index === bin.rects.length - 1,
       index,

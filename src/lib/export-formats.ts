@@ -18,7 +18,8 @@ const T_JSON_ARRAY = `{
       "rotated": {{rotated}},
       "trimmed": {{trimmed}},
       "spriteSourceSize": { "x": {{spriteSourceSize.x}}, "y": {{spriteSourceSize.y}}, "w": {{spriteSourceSize.w}}, "h": {{spriteSourceSize.h}} },
-      "sourceSize": { "w": {{sourceSize.w}}, "h": {{sourceSize.h}} }
+      "sourceSize": { "w": {{sourceSize.w}}, "h": {{sourceSize.h}} },
+      "pivot": { "x": {{pivot.x}}, "y": {{pivot.y}} }
     }{{^last}},{{/last}}
     {{/rects}}
   ],
@@ -33,7 +34,8 @@ const T_JSON_HASH = `{
       "rotated": {{rotated}},
       "trimmed": {{trimmed}},
       "spriteSourceSize": { "x": {{spriteSourceSize.x}}, "y": {{spriteSourceSize.y}}, "w": {{spriteSourceSize.w}}, "h": {{spriteSourceSize.h}} },
-      "sourceSize": { "w": {{sourceSize.w}}, "h": {{sourceSize.h}} }
+      "sourceSize": { "w": {{sourceSize.w}}, "h": {{sourceSize.h}} },
+      "pivot": { "x": {{pivot.x}}, "y": {{pivot.y}} }
     }{{^last}},{{/last}}
     {{/rects}}
   },
@@ -50,7 +52,8 @@ const T_PHASER3 = `{
         "filename": "{{{name}}}", "rotated": {{rotated}}, "trimmed": {{trimmed}},
         "sourceSize": { "w": {{sourceSize.w}}, "h": {{sourceSize.h}} },
         "spriteSourceSize": { "x": {{spriteSourceSize.x}}, "y": {{spriteSourceSize.y}}, "w": {{spriteSourceSize.w}}, "h": {{spriteSourceSize.h}} },
-        "frame": { "x": {{frame.x}}, "y": {{frame.y}}, "w": {{frame.w}}, "h": {{frame.h}} }
+        "frame": { "x": {{frame.x}}, "y": {{frame.y}}, "w": {{frame.w}}, "h": {{frame.h}} },
+        "pivot": { "x": {{pivot.x}}, "y": {{pivot.y}} }
       }{{^last}},{{/last}}
       {{/rects}}
     ]
@@ -93,7 +96,7 @@ const T_UNITY = `:format=40300
 :pivotpoints=enabled
 :borders=disabled
 {{#rects}}
-{{{escapedName}}};{{frame.x}};{{mirrorY}};{{frame.w}};{{frame.h}}; 0.5;0.5; 0;0;0;0
+{{{escapedName}}};{{frame.x}};{{mirrorY}};{{frame.w}};{{frame.h}}; {{pivot.x}};{{pivot.y}}; 0;0;0;0
 {{/rects}}`;
 
 const T_GODOT = `[gd_resource type="AtlasTexture" load_steps={{loadSteps}} format=3]
@@ -167,7 +170,7 @@ const T_EGRET2D = `{
 const T_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <TextureAtlas imagePath="{{config.imageName}}" width="{{config.imageWidth}}" height="{{config.imageHeight}}" scale="1" format="RGBA8888">
   {{#rects}}
-  <sprite n="{{{name}}}" x="{{frame.x}}" y="{{frame.y}}" w="{{frame.w}}" h="{{frame.h}}" pX="0.5" pY="0.5"{{#trimmed}} oX="{{spriteSourceSize.x}}" oY="{{spriteSourceSize.y}}" oW="{{sourceSize.w}}" oH="{{sourceSize.h}}"{{/trimmed}}{{#rotated}} r="y"{{/rotated}}/>
+  <sprite n="{{{name}}}" x="{{frame.x}}" y="{{frame.y}}" w="{{frame.w}}" h="{{frame.h}}" pX="{{pivot.x}}" pY="{{pivot.y}}"{{#trimmed}} oX="{{spriteSourceSize.x}}" oY="{{spriteSourceSize.y}}" oW="{{sourceSize.w}}" oH="{{sourceSize.h}}"{{/trimmed}}{{#rotated}} r="y"{{/rotated}}/>
   {{/rects}}
 </TextureAtlas>`;
 

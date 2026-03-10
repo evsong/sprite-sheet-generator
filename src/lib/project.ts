@@ -14,6 +14,8 @@ interface SpriteForgeProject {
     isAi: boolean;
     dataUrl: string; // base64 PNG
     mode?: GenerationMode;
+    pivot?: { x: number; y: number };
+    tags?: Record<string, string>;
   }[];
 }
 
@@ -50,6 +52,8 @@ export function exportProject(
       isAi: s.isAi,
       dataUrl: spriteToDataUrl(s),
       mode: s.mode,
+      pivot: s.pivot,
+      tags: s.tags,
     })),
   };
 
@@ -96,6 +100,8 @@ export async function importProject(file: File): Promise<{
         trimmed: false,
         isAi: s.isAi,
         mode: s.mode,
+        pivot: s.pivot ?? { x: 0.5, y: 0.5 },
+        tags: s.tags,
       };
     })
   );
