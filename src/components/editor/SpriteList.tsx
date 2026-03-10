@@ -307,6 +307,12 @@ export function SpriteList() {
                   {Object.values(sprite.tags).join("/")}
                 </span>
               )}
+              {sprite.trimmed && sprite.trimRect && sprite.sourceSize && (
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 6, color: "#22C55E", background: "rgba(34,197,94,0.12)", padding: "0 3px", lineHeight: "1.5", letterSpacing: "0.05em", flexShrink: 0 }}
+                  title={`Trimmed: ${sprite.trimRect.w}x${sprite.trimRect.h} from ${sprite.sourceSize.w}x${sprite.sourceSize.h}`}>
+                  TRIM {Math.round((1 - (sprite.trimRect.w * sprite.trimRect.h) / (sprite.sourceSize.w * sprite.sourceSize.h)) * 100)}%
+                </span>
+              )}
               <span className="ml-auto shrink-0" style={{ color: "var(--text-muted)", fontSize: 8 }}>{sprite.width}×{sprite.height}</span>
               <button
                 onClick={(e) => { e.stopPropagation(); removeSprite(sprite.id); }}

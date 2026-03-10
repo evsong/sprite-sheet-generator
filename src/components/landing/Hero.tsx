@@ -61,9 +61,9 @@ export function Hero() {
               maxWidth: "440px",
             }}
           >
-            The industrial-grade packing tool for game developers. MaxRects
-            algorithm, 15+ engine formats, zero server uploads. All in your
-            browser.
+            The industrial-grade packing tool for game developers. AI-powered
+            animation sequences &amp; icon atlases, MaxRects packing, 15+ engine
+            formats, real-time Godot/Unity sync. All in your browser.
           </p>
 
           <div className="flex gap-2.5">
@@ -87,7 +87,7 @@ export function Hero() {
               Start Forging
             </Link>
             <a
-              href="#"
+              href="/docs"
               className="inline-flex items-center cursor-pointer"
               style={{
                 height: "36px",
@@ -115,7 +115,7 @@ export function Hero() {
             }}
           >
             {[
-              { val: "0ms", label: "Latency" },
+              { val: "2", label: "AI Modes" },
               { val: "100%", label: "Client-side" },
               { val: "15+", label: "Formats" },
             ].map((s) => (

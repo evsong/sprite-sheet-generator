@@ -5,16 +5,12 @@ import type { ExportOptions } from "@/lib/exporter";
 import { FILENAME_PRESETS } from "@/lib/filename-parser";
 import { formatBytes } from "@/lib/compression";
 import type { ImageFormat } from "@/lib/compression";
+import { getTierFromSession, isPro as isProTier } from "@/lib/tier";
+import { UpgradePrompt } from "@/components/shared/UpgradePrompt";
 import { useSession } from "next-auth/react";
 import { useMemo, useState, useEffect, useCallback } from "react";
 
 const FORMAT_GROUPS = getFormatGroups();
-
-/** Simple tier check. Returns true for PRO/TEAM users. Does not block features. */
-function isPro(session: ReturnType<typeof useSession>["data"]): boolean {
-  const tier = (session?.user as Record<string, unknown> | undefined)?.tier as string ?? "FREE";
-  return tier === "PRO" || tier === "TEAM";
-}
 
 const S: Record<string, React.CSSProperties> = {
   section: { padding: "6px 8px", borderBottom: "1px solid var(--border)" },
@@ -73,7 +69,8 @@ export function SettingsPanel() {
   const updateCompressionConfig = useEditorStore((s) => s.updateCompressionConfig);
 
   const { data: session } = useSession();
-  const isPaid = isPro(session);
+  const userTier = getTierFromSession(session as { user?: Record<string, unknown> } | null);
+  const isPaid = isProTier(userTier);
   const [copied, setCopied] = useState(false);
 
   // File size preview state
@@ -125,6 +122,28 @@ export function SettingsPanel() {
           <div style={S.row}><label style={S.label}>POT</label><span style={stats.pot ? S.valGreen : S.val}>{stats.pot ? "Yes" : "No"}</span></div>
           <div style={S.row}><label style={S.label}>Pages</label><span style={stats.draws > 1 ? S.valCyan : S.val}>{stats.draws}</span></div>
           <div style={S.row}><label style={S.label}>Draw Calls</label><span style={S.val}>{stats.draws}</span></div>
+        </div>
+      )}
+      {/* Selected Sprite Info */}
+      {selectedSprite && (
+        <div style={S.section}>
+          <h4 style={S.h4}>Selected Sprite</h4>
+          <div style={S.row}><label style={S.label}>Name</label><span style={S.valCyan}>{selectedSprite.name}</span></div>
+          <div style={S.row}><label style={S.label}>Size</label><span style={S.val}>{selectedSprite.width} x {selectedSprite.height}</span></div>
+          {selectedSprite.trimmed && selectedSprite.trimRect && selectedSprite.sourceSize && (
+            <>
+              <div style={S.row}><label style={S.label}>Original</label><span style={S.val}>{selectedSprite.sourceSize.w} x {selectedSprite.sourceSize.h}</span></div>
+              <div style={S.row}><label style={S.label}>Trim Rect</label><span style={S.val}>{selectedSprite.trimRect.x},{selectedSprite.trimRect.y} {selectedSprite.trimRect.w}x{selectedSprite.trimRect.h}</span></div>
+              <div style={S.row}><label style={S.label}>Trim Saved</label>
+                <span style={S.valGreen}>
+                  {Math.round((1 - (selectedSprite.trimRect.w * selectedSprite.trimRect.h) / (selectedSprite.sourceSize.w * selectedSprite.sourceSize.h)) * 100)}%
+                </span>
+              </div>
+            </>
+          )}
+          {selectedSprite.normalMap && (
+            <div style={S.row}><label style={S.label}>Normal Map</label><span style={S.valGreen}>Generated</span></div>
+          )}
         </div>
       )}
       {/* Packing */}
@@ -274,8 +293,11 @@ export function SettingsPanel() {
         <h4 style={S.h4}>Normal Map</h4>
         <div style={S.row}>
           <label style={S.label}>Enable</label>
-          <Toggle on={normalMapEnabled} onClick={() => setNormalMapEnabled(!normalMapEnabled)} />
+          <Toggle on={normalMapEnabled} onClick={() => { if (!isPaid && !normalMapEnabled) return; setNormalMapEnabled(!normalMapEnabled); }} />
         </div>
+        {!isPaid && !normalMapEnabled && (
+          <UpgradePrompt feature="Normal maps require Pro" compact />
+        )}
         {normalMapEnabled && (
           <>
             <div style={S.row}>
@@ -311,13 +333,20 @@ export function SettingsPanel() {
           <select
             style={S.select}
             value={compressionConfig.format}
-            onChange={(e) => updateCompressionConfig({ format: e.target.value as ImageFormat })}
+            onChange={(e) => {
+              const val = e.target.value as ImageFormat;
+              if (!isPaid && val !== "png") return;
+              updateCompressionConfig({ format: val });
+            }}
           >
             <option value="png">PNG</option>
-            <option value="webp">WebP</option>
-            <option value="avif">AVIF</option>
+            <option value="webp" disabled={!isPaid}>WebP{!isPaid ? " PRO" : ""}</option>
+            <option value="avif" disabled={!isPaid}>AVIF{!isPaid ? " PRO" : ""}</option>
           </select>
         </div>
+        {!isPaid && (
+          <UpgradePrompt feature="WebP & AVIF compression require Pro" compact />
+        )}
         {compressionConfig.format !== "png" && (
           <div style={S.row}>
             <label style={S.label}>Quality</label>
@@ -393,6 +422,22 @@ export function SettingsPanel() {
           style={{ width: "100%", height: 22, fontSize: 9, fontFamily: "var(--font-mono)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", background: "var(--cyan)", color: "#fff", border: "1px solid var(--cyan)", marginTop: 4, cursor: bins.length === 0 ? "not-allowed" : "pointer", opacity: bins.length === 0 ? 0.3 : 1 }}>
           Download .zip ↓
         </button>
+        <button onClick={() => {
+          import("@/lib/config-export").then(({ generateCliConfig, downloadCliConfig }) => {
+            const cliConfig = generateCliConfig({
+              packingConfig: config,
+              normalMapEnabled,
+              normalMapAutoGenerate,
+              normalMapStrength,
+              compressionConfig,
+            });
+            downloadCliConfig(cliConfig);
+          });
+        }}
+          className="hover:border-[var(--text)] hover:text-[var(--text)] transition-all duration-100"
+          style={{ width: "100%", height: 20, fontSize: 9, fontFamily: "var(--font-mono)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", background: "transparent", color: "var(--text-dim)", border: "1px solid var(--border)", marginTop: 3, cursor: "pointer" }}>
+          Export .spriteforge.json
+        </button>
       </div>
       {/* Code Snippet */}
       {stats && (
@@ -423,8 +468,11 @@ export function SettingsPanel() {
         <h4 style={S.h4}>Engine Sync</h4>
         <div style={S.row}>
           <label style={S.label}>Auto-Sync</label>
-          <Toggle on={engineSync.autoSync} onClick={() => updateEngineSync({ autoSync: !engineSync.autoSync })} />
+          <Toggle on={engineSync.autoSync} onClick={() => { if (!isPaid && !engineSync.autoSync) return; updateEngineSync({ autoSync: !engineSync.autoSync }); }} />
         </div>
+        {!isPaid && !engineSync.autoSync && (
+          <UpgradePrompt feature="Engine sync requires Pro" compact />
+        )}
         <div style={S.row}>
           <label style={S.label}>Port</label>
           <input
@@ -464,6 +512,49 @@ export function SettingsPanel() {
             HTTPS detected — ws:// connections to localhost may be blocked. Use HTTP for local sync.
           </div>
         )}
+        {/* Plugin Downloads */}
+        <div style={{ marginTop: 6 }}>
+          <h4 style={{ ...S.h4, marginBottom: 4 }}>Download Plugins</h4>
+          <div className="flex gap-1">
+            <button
+              onClick={() => {
+                import("@/lib/plugin-bundler").then(({ downloadGodotPlugin }) => {
+                  downloadGodotPlugin();
+                });
+              }}
+              className="hover:border-[var(--text)] hover:text-[var(--text)] transition-all duration-100"
+              style={{
+                flex: 1, height: 20, fontSize: 8,
+                fontFamily: "var(--font-mono)", fontWeight: 600,
+                textTransform: "uppercase", letterSpacing: "0.05em",
+                color: "var(--text-dim)", background: "transparent",
+                border: "1px solid var(--border)", cursor: "pointer",
+              }}
+            >
+              Godot 4
+            </button>
+            <button
+              onClick={() => {
+                import("@/lib/plugin-bundler").then(({ downloadUnityPlugin }) => {
+                  downloadUnityPlugin();
+                });
+              }}
+              className="hover:border-[var(--text)] hover:text-[var(--text)] transition-all duration-100"
+              style={{
+                flex: 1, height: 20, fontSize: 8,
+                fontFamily: "var(--font-mono)", fontWeight: 600,
+                textTransform: "uppercase", letterSpacing: "0.05em",
+                color: "var(--text-dim)", background: "transparent",
+                border: "1px solid var(--border)", cursor: "pointer",
+              }}
+            >
+              Unity
+            </button>
+          </div>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 7, color: "var(--text-muted)", lineHeight: 1.3, marginTop: 2, display: "block" }}>
+            Install in your engine to receive live atlas updates.
+          </span>
+        </div>
       </div>
     </div>
   );

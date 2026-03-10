@@ -8,9 +8,9 @@ export function HowItWorks() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-px" style={{ background: "var(--border)", border: "1px solid var(--border)" }}>
           {[
-            { num: "Step 01 — Input", title: "Drop or Generate", desc: "Drag individual sprite frames into the workspace, or describe a character and let AI generate consistent animation frames for you." },
-            { num: "Step 02 — Pack", title: "Auto-Arrange", desc: "MaxRects algorithm packs frames into the tightest possible sheet. Transparent pixels are trimmed, rotations optimized, power-of-two enforced." },
-            { num: "Step 03 — Export", title: "Ship It", desc: "Download the sprite sheet PNG plus engine-specific data files. Copy the loader snippet directly into your Phaser, Unity, or Godot project." },
+            { num: "Step 01 — Input", title: "Drop or Generate", desc: "Drag sprite frames into the workspace, or use AI to generate animation sequences and icon atlases from a text prompt." },
+            { num: "Step 02 — Pack", title: "Auto-Arrange", desc: "MaxRects algorithm packs frames into the tightest possible sheet. Trimming, rotation, power-of-two, normal maps, and compression — all automatic." },
+            { num: "Step 03 — Export", title: "Ship It", desc: "Download sprite sheets in 15+ engine formats. Sync directly to Godot or Unity via WebSocket, or copy the loader snippet into your project." },
           ].map((s) => (
             <div key={s.num} style={{ background: "var(--bg-panel)", padding: "24px" }}>
               <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--cyan)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.08em" }}>{s.num}</div>

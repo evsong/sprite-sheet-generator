@@ -1,11 +1,13 @@
 import { useEditorStore } from "@/stores/editor-store";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 export function AssetPreview() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const sprites = useEditorStore((s) => s.sprites);
   const selectedSpriteId = useEditorStore((s) => s.selectedSpriteId);
+  const normalMapEnabled = useEditorStore((s) => s.normalMapEnabled);
+  const [showNormalMap, setShowNormalMap] = useState(false);
 
   const selectedSprite = sprites.find(
     (s) => s.id === selectedSpriteId && s.mode === "atlas"
@@ -36,14 +38,26 @@ export function AssetPreview() {
       }
     }
 
-    if (!selectedSprite?.image) {
+    // Choose which image to display: normal map or diffuse
+    const displayImage = showNormalMap && selectedSprite?.normalMap
+      ? selectedSprite.normalMap
+      : selectedSprite?.image;
+
+    if (!displayImage) {
       ctx.fillStyle = "#333";
       ctx.font = "12px 'JetBrains Mono', monospace";
       ctx.textAlign = "center";
-      ctx.fillText("No asset selected", cw / 2, ch / 2 - 8);
-      ctx.font = "10px 'JetBrains Mono', monospace";
-      ctx.fillStyle = "#555";
-      ctx.fillText("Click an asset to preview", cw / 2, ch / 2 + 10);
+      if (showNormalMap && selectedSprite?.image && !selectedSprite.normalMap) {
+        ctx.fillText("No normal map generated", cw / 2, ch / 2 - 8);
+        ctx.font = "10px 'JetBrains Mono', monospace";
+        ctx.fillStyle = "#555";
+        ctx.fillText("Enable auto-generate in Normal Map settings", cw / 2, ch / 2 + 10);
+      } else {
+        ctx.fillText("No asset selected", cw / 2, ch / 2 - 8);
+        ctx.font = "10px 'JetBrains Mono', monospace";
+        ctx.fillStyle = "#555";
+        ctx.fillText("Click an asset to preview", cw / 2, ch / 2 + 10);
+      }
       return;
     }
 
@@ -51,26 +65,25 @@ export function AssetPreview() {
     const padding = 24;
     const maxW = cw - padding * 2;
     const maxH = ch - padding * 2;
-    const scale = Math.min(
-      maxW / selectedSprite.width,
-      maxH / selectedSprite.height
-    );
-    const drawW = selectedSprite.width * scale;
-    const drawH = selectedSprite.height * scale;
+    const imgW = displayImage.naturalWidth || selectedSprite!.width;
+    const imgH = displayImage.naturalHeight || selectedSprite!.height;
+    const scale = Math.min(maxW / imgW, maxH / imgH);
+    const drawW = imgW * scale;
+    const drawH = imgH * scale;
     const drawX = (cw - drawW) / 2;
     const drawY = (ch - drawH) / 2;
 
     ctx.save();
     ctx.imageSmoothingEnabled = scale < 2;
     if (scale >= 2) ctx.imageSmoothingQuality = "low";
-    ctx.drawImage(selectedSprite.image, drawX, drawY, drawW, drawH);
+    ctx.drawImage(displayImage, drawX, drawY, drawW, drawH);
     ctx.restore();
 
     // Selection highlight
     ctx.strokeStyle = "rgba(6,182,212,0.4)";
     ctx.lineWidth = 1;
     ctx.strokeRect(drawX, drawY, drawW, drawH);
-  }, [selectedSprite, sprites]);
+  }, [selectedSprite, sprites, showNormalMap]);
 
   return (
     <div
@@ -80,10 +93,11 @@ export function AssetPreview() {
     >
       {/* Label */}
       <div
-        className="absolute z-10"
+        className="absolute z-10 flex items-center gap-2"
         style={{
           top: 4,
           left: 8,
+          right: 8,
           fontFamily: "var(--font-mono)",
           fontSize: 8,
           color: "var(--text-muted)",
@@ -91,11 +105,38 @@ export function AssetPreview() {
           letterSpacing: "0.08em",
         }}
       >
-        Preview
-        {selectedSprite && (
-          <span style={{ color: "var(--cyan)", marginLeft: 6 }}>
-            {selectedSprite.name}
-          </span>
+        <span>
+          Preview
+          {showNormalMap && <span style={{ color: "var(--cyan)", marginLeft: 4 }}>Normal</span>}
+          {selectedSprite && (
+            <span style={{ color: "var(--cyan)", marginLeft: 6 }}>
+              {selectedSprite.name}
+            </span>
+          )}
+        </span>
+        {normalMapEnabled && (
+          <button
+            onClick={() => setShowNormalMap(!showNormalMap)}
+            title={showNormalMap ? "Show diffuse texture" : "Show normal map"}
+            className="ml-auto hover:border-[var(--text)] transition-all duration-100"
+            style={{
+              width: 18,
+              height: 14,
+              fontSize: 7,
+              fontFamily: "var(--font-mono)",
+              fontWeight: 600,
+              color: showNormalMap ? "var(--cyan)" : "var(--text-muted)",
+              background: showNormalMap ? "rgba(6,182,212,0.1)" : "transparent",
+              border: `1px solid ${showNormalMap ? "var(--cyan)" : "var(--border)"}`,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textTransform: "uppercase",
+            }}
+          >
+            N
+          </button>
         )}
       </div>
 

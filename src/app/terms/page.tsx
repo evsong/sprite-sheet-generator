@@ -18,7 +18,7 @@ export default function TermsPage() {
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>
             Terms of Service
           </h1>
-          <p style={{ ...p, marginBottom: "32px" }}>Last updated: February 20, 2026</p>
+          <p style={{ ...p, marginBottom: "32px" }}>Last updated: March 10, 2026</p>
 
           <h2 style={h2}>1. Acceptance of Terms</h2>
           <p style={p}>By accessing or using SpriteForge, you agree to be bound by these Terms of Service. If you do not agree to these terms, do not use the service.</p>
@@ -37,6 +37,9 @@ export default function TermsPage() {
 
           <h2 style={h2}>6. Intellectual Property</h2>
           <p style={p}>You retain all rights to the content you upload and create using SpriteForge. We do not claim ownership of your sprites, images, or exported files. The SpriteForge service, including its design, code, and branding, is our intellectual property.</p>
+
+          <h2 style={h2}>6a. AI-Generated Content</h2>
+          <p style={p}>SpriteForge offers AI-powered sprite generation using third-party AI models (Google Gemini). Content generated through the AI feature is provided to you for use in your projects without restriction. However, we make no guarantees regarding the uniqueness or originality of AI-generated content. You are responsible for ensuring your use of AI-generated content complies with applicable laws. AI-generated sprites may resemble content created by others using the same AI models.</p>
 
           <h2 style={h2}>7. Acceptable Use</h2>
           <p style={p}>You agree not to: use the service for any illegal purpose; upload malicious files or attempt to compromise the service; resell or redistribute the service without authorization; use automated tools to scrape or overload the service.</p>

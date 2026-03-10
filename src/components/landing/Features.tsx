@@ -50,7 +50,7 @@ export function Features() {
           <div className="md:col-span-2" style={cardStyle}>
             <span style={numStyle}>01</span>
             <h3 style={h3Style}>Smart Packing</h3>
-            <p style={pStyle}>MaxRects bin packing with heuristic selection. Auto-rotation, transparent trimming, and power-of-two alignment for GPU-friendly sheets.</p>
+            <p style={pStyle}>MaxRects bin packing with heuristic selection. Auto-rotation, transparent trimming, power-of-two alignment, and WebP/AVIF compression for optimized, GPU-friendly sheets.</p>
             <div style={miniStyle}>
               <div className="flex justify-between" style={rowStyle}><span>Density</span><span style={{ color: "var(--cyan)" }}>94%</span></div>
               <div style={{ height: "3px", background: "var(--bg-elevated)", width: "100%", margin: "6px 0" }}><div style={{ height: "100%", background: "var(--cyan)", width: "94%" }} /></div>
@@ -61,7 +61,7 @@ export function Features() {
           <div style={cardStyle}>
             <span style={numStyle}>02</span>
             <h3 style={h3Style}>AI Generation</h3>
-            <p style={pStyle}>Describe a character, get consistent sprite frames. Walk cycles, attacks, idles — generated and packed automatically.</p>
+            <p style={pStyle}>Two modes: generate animation sequences (walk cycles, attacks, idles) or icon atlases (inventory items, UI elements). Describe it, get production-ready frames.</p>
             <div style={miniStyle}>
               <div className="flex justify-between" style={rowStyle}><span>Prompt</span><span>Pixel Knight</span></div>
               <div className="flex justify-between" style={rowStyle}><span>Frames</span><span>8</span></div>
@@ -76,7 +76,7 @@ export function Features() {
           <div style={cardStyle}>
             <span style={numStyle}>04</span>
             <h3 style={h3Style}>Multi-Export</h3>
-            <p style={pStyle}>PixiJS, Phaser 3, Unity, Godot, CSS, XML — 15+ formats with engine-specific data files.</p>
+            <p style={pStyle}>PixiJS, Phaser 3, Unity, Godot, Spine, Cocos2d, CSS, XML — 15+ formats with engine-specific data files and normal map support.</p>
             <div style={miniStyle}>
               <div className="flex justify-between" style={rowStyle}><span>Unity</span><span>.json</span></div>
               <div className="flex justify-between" style={rowStyle}><span>Godot</span><span>.tres</span></div>
@@ -85,14 +85,14 @@ export function Features() {
           </div>
           <div className="md:col-span-2" style={cardStyle}>
             <span style={numStyle}>05</span>
-            <h3 style={h3Style}>Engine Code Snippets</h3>
-            <p style={pStyle}>One-click copy of loader code for your engine. Paste directly into your project — no manual wiring.</p>
+            <h3 style={h3Style}>Engine Sync &amp; Snippets</h3>
+            <p style={pStyle}>Real-time WebSocket sync pushes atlas updates to Godot and Unity. One-click loader snippets — paste directly into your project.</p>
             <div style={miniStyle} dangerouslySetInnerHTML={{ __html: `<span class="ck">this</span>.load.<span class="cf">atlas</span>(<span class="cs">'hero'</span>, <span class="cs">'hero.png'</span>, <span class="cs">'hero.json'</span>);\n<span class="ck">this</span>.anims.<span class="cf">create</span>({ <span class="cf">key</span>: <span class="cs">'run'</span>, <span class="cf">frameRate</span>: <span class="cn">12</span> });` }} />
           </div>
           <div style={cardStyle}>
             <span style={numStyle}>06</span>
             <h3 style={h3Style}>Zero Install</h3>
-            <p style={pStyle}>Runs entirely in your browser. Images never leave your machine. No signup for free tier.</p>
+            <p style={pStyle}>Runs entirely in your browser. Auto-generated normal maps, pivot points, filename auto-tagging, and atlas diffing — no signup required for free tier.</p>
           </div>
         </div>
       </div>

@@ -18,7 +18,7 @@ export default function PrivacyPage() {
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>
             Privacy Policy
           </h1>
-          <p style={{ ...p, marginBottom: "32px" }}>Last updated: February 20, 2026</p>
+          <p style={{ ...p, marginBottom: "32px" }}>Last updated: March 10, 2026</p>
 
           <h2 style={h2}>1. Information We Collect</h2>
           <p style={p}>When you create an account, we collect your email address, display name, and avatar URL. When you use the editor, your project data (sprite configurations, uploaded images) is stored in our systems. We also collect basic usage analytics such as page views and feature usage to improve the service.</p>
@@ -30,10 +30,11 @@ export default function PrivacyPage() {
           <p style={p}>Your data is stored on secure servers provided by Vercel and Neon (PostgreSQL). All data transmission is encrypted via HTTPS/TLS. We implement industry-standard security measures to protect against unauthorized access, alteration, or destruction of your data.</p>
 
           <h2 style={h2}>4. Third-Party Services</h2>
-          <p style={p}>We use the following third-party services: Creem (payment processing as Merchant of Record); Resend (transactional email delivery); Vercel (hosting); Neon (database). Each service has its own privacy policy governing their handling of your data.</p>
+          <p style={p}>We use the following third-party services: Stripe (payment processing); Resend (transactional email delivery); Vercel (hosting and analytics); Neon (database); Google Gemini API (AI sprite generation). Each service has its own privacy policy governing their handling of your data.</p>
+          <p style={p}>When you use the AI sprite generation feature, your text prompts are sent to the Google Gemini API for processing. Uploaded images used in AI transform features (variants, recolor, upscale) are also transmitted to this API. Google may process this data according to their AI terms of service. We do not store your prompts beyond the duration of the API request.</p>
 
           <h2 style={h2}>5. Cookies</h2>
-          <p style={p}>We use essential cookies for authentication and session management. We do not use advertising or tracking cookies. You can disable cookies in your browser settings, but this may affect your ability to use the service.</p>
+          <p style={p}>We use essential cookies for authentication and session management. Specifically: a session cookie ({`authjs.session-token`} or {`__Secure-authjs.session-token`} on HTTPS) that expires when your browser session ends or after 30 days if you choose to stay signed in; and a CSRF protection cookie ({`authjs.csrf-token`}). We use Vercel Analytics for privacy-focused, anonymous page-view tracking that does not use cookies. We do not use advertising or tracking cookies. You can disable cookies in your browser settings, but this may affect your ability to sign in.</p>
 
           <h2 style={h2}>6. Your Rights</h2>
           <p style={p}>You have the right to: access your personal data through your account settings; update or correct your information at any time; delete your account and all associated data from the Settings page; export your project data. To exercise these rights, visit your account settings or contact us at support@spriteforge.online.</p>

@@ -1,5 +1,5 @@
 import { useEditorStore } from "@/stores/editor-store";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 export function AnimationPreview() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -8,6 +8,8 @@ export function AnimationPreview() {
   const animation = useEditorStore((s) => s.animation);
   const selectedSpriteId = useEditorStore((s) => s.selectedSpriteId);
   const pivotEditMode = useEditorStore((s) => s.pivotEditMode);
+  const normalMapEnabled = useEditorStore((s) => s.normalMapEnabled);
+  const [showNormalMap, setShowNormalMap] = useState(false);
 
   // When not playing and a sprite is selected, show it; otherwise show current animation frame
   const selectedSprite = selectedSpriteId ? sprites.find((s) => s.id === selectedSpriteId && s.mode !== "atlas") : null;
@@ -36,15 +38,27 @@ export function AnimationPreview() {
       }
     }
 
-    if (!currentSprite?.image) {
+    // Choose which image to display: normal map or diffuse
+    const displayImage = showNormalMap && currentSprite?.normalMap
+      ? currentSprite.normalMap
+      : currentSprite?.image;
+
+    if (!displayImage) {
       // No frames hint
       ctx.fillStyle = "#333";
       ctx.font = "12px 'JetBrains Mono', monospace";
       ctx.textAlign = "center";
-      ctx.fillText("No animation frames", cw / 2, ch / 2 - 8);
-      ctx.font = "10px 'JetBrains Mono', monospace";
-      ctx.fillStyle = "#555";
-      ctx.fillText("Generate or import frames to preview", cw / 2, ch / 2 + 10);
+      if (showNormalMap && currentSprite?.image && !currentSprite.normalMap) {
+        ctx.fillText("No normal map generated", cw / 2, ch / 2 - 8);
+        ctx.font = "10px 'JetBrains Mono', monospace";
+        ctx.fillStyle = "#555";
+        ctx.fillText("Enable auto-generate in Normal Map settings", cw / 2, ch / 2 + 10);
+      } else {
+        ctx.fillText("No animation frames", cw / 2, ch / 2 - 8);
+        ctx.font = "10px 'JetBrains Mono', monospace";
+        ctx.fillStyle = "#555";
+        ctx.fillText("Generate or import frames to preview", cw / 2, ch / 2 + 10);
+      }
       return;
     }
 
@@ -52,9 +66,11 @@ export function AnimationPreview() {
     const padding = 24;
     const maxW = cw - padding * 2;
     const maxH = ch - padding * 2;
-    const scale = Math.min(maxW / currentSprite.width, maxH / currentSprite.height);
-    const drawW = currentSprite.width * scale;
-    const drawH = currentSprite.height * scale;
+    const imgW = displayImage.naturalWidth || currentSprite?.width || 1;
+    const imgH = displayImage.naturalHeight || currentSprite?.height || 1;
+    const scale = Math.min(maxW / imgW, maxH / imgH);
+    const drawW = imgW * scale;
+    const drawH = imgH * scale;
     const drawX = (cw - drawW) / 2;
     const drawY = (ch - drawH) / 2;
 
@@ -81,7 +97,7 @@ export function AnimationPreview() {
     ctx.save();
     ctx.imageSmoothingEnabled = scale < 2;
     if (scale >= 2) ctx.imageSmoothingQuality = "low";
-    ctx.drawImage(currentSprite.image, drawX, drawY, drawW, drawH);
+    ctx.drawImage(displayImage, drawX, drawY, drawW, drawH);
     ctx.restore();
 
     // Selection highlight
@@ -90,7 +106,7 @@ export function AnimationPreview() {
     ctx.strokeRect(drawX, drawY, drawW, drawH);
 
     // Draw pivot crosshair
-    if (pivotEditMode && currentSprite.pivot) {
+    if (pivotEditMode && currentSprite?.pivot) {
       const px = drawX + currentSprite.pivot.x * drawW;
       const py = drawY + currentSprite.pivot.y * drawH;
       ctx.save();
@@ -114,7 +130,7 @@ export function AnimationPreview() {
       ctx.restore();
     }
 
-  }, [currentSprite, animation, sprites, selectedSpriteId, pivotEditMode]);
+  }, [currentSprite, animation, sprites, selectedSpriteId, pivotEditMode, showNormalMap]);
 
   return (
     <div
@@ -124,24 +140,51 @@ export function AnimationPreview() {
     >
       {/* Label */}
       <div
-        className="absolute z-10"
+        className="absolute z-10 flex items-center gap-2"
         style={{
-          top: 4, left: 8,
+          top: 4, left: 8, right: 8,
           fontFamily: "var(--font-mono)", fontSize: 8,
           color: "var(--text-muted)", textTransform: "uppercase",
           letterSpacing: "0.08em",
         }}
       >
-        Preview
-        {!animation.playing && selectedSprite ? (
-          <span style={{ color: "var(--cyan)", marginLeft: 6 }}>
-            {selectedSprite.name}
-          </span>
-        ) : animation.frames.length > 0 ? (
-          <span style={{ color: "var(--cyan)", marginLeft: 6 }}>
-            {String(animation.currentFrame + 1).padStart(2, "0")}/{String(animation.frames.length).padStart(2, "0")}
-          </span>
-        ) : null}
+        <span>
+          Preview
+          {showNormalMap && <span style={{ color: "var(--cyan)", marginLeft: 4 }}>Normal</span>}
+          {!animation.playing && selectedSprite ? (
+            <span style={{ color: "var(--cyan)", marginLeft: 6 }}>
+              {selectedSprite.name}
+            </span>
+          ) : animation.frames.length > 0 ? (
+            <span style={{ color: "var(--cyan)", marginLeft: 6 }}>
+              {String(animation.currentFrame + 1).padStart(2, "0")}/{String(animation.frames.length).padStart(2, "0")}
+            </span>
+          ) : null}
+        </span>
+        {normalMapEnabled && (
+          <button
+            onClick={() => setShowNormalMap(!showNormalMap)}
+            title={showNormalMap ? "Show diffuse texture" : "Show normal map"}
+            className="ml-auto hover:border-[var(--text)] transition-all duration-100"
+            style={{
+              width: 18,
+              height: 14,
+              fontSize: 7,
+              fontFamily: "var(--font-mono)",
+              fontWeight: 600,
+              color: showNormalMap ? "var(--cyan)" : "var(--text-muted)",
+              background: showNormalMap ? "rgba(6,182,212,0.1)" : "transparent",
+              border: `1px solid ${showNormalMap ? "var(--cyan)" : "var(--border)"}`,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textTransform: "uppercase",
+            }}
+          >
+            N
+          </button>
+        )}
       </div>
 
       {/* Canvas */}

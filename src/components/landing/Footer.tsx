@@ -4,10 +4,10 @@ export function Footer() {
       <div className="grid grid-cols-2 md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-8" style={{ maxWidth: "var(--container)", margin: "0 auto" }}>
         <div className="col-span-2 md:col-span-1">
           <div style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.06em", color: "#fff", marginBottom: "6px", textTransform: "uppercase" }}>SPRITEFORGE</div>
-          <p style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5 }}>Production-grade sprite sheet tooling for game developers. Pack, preview, export — all in your browser.</p>
+          <p style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5 }}>AI-powered sprite sheet tooling for game developers. Sequence &amp; atlas generation, smart packing, engine sync — all in your browser.</p>
         </div>
         {[
-          { title: "Product", links: [{ label: "Editor", href: "/editor" }, { label: "Pricing", href: "/pricing" }] },
+          { title: "Product", links: [{ label: "Editor", href: "/editor" }, { label: "Docs", href: "/docs" }, { label: "Pricing", href: "/pricing" }] },
           { title: "Legal", links: [{ label: "Privacy Policy", href: "/privacy" }, { label: "Terms of Service", href: "/terms" }] },
           { title: "Contact", links: [{ label: "support@spriteforge.online", href: "mailto:support@spriteforge.online" }] },
         ].map((col) => (
