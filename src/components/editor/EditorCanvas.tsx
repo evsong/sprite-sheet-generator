@@ -149,7 +149,7 @@ export function EditorCanvas() {
   }, [addSprites]);
 
   return (
-    <div ref={containerRef} className="relative overflow-hidden flex flex-col"
+    <div ref={containerRef} className="relative overflow-hidden flex flex-col flex-1"
       style={{ background: "var(--bg)" }}
       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
       onDrop={handleDrop}>

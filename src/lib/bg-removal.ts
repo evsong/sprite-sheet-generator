@@ -3,6 +3,66 @@ import { pipeline, env, type RawImage } from "@huggingface/transformers";
 // Use CDN for WASM/ONNX backends in browser
 env.allowLocalModels = false;
 
+// --- Green-screen (chroma key) removal ---
+
+/**
+ * Detect if an image has a solid bright green (#00FF00) background.
+ * Checks corners for dominant green pixels.
+ */
+export function detectGreenScreen(imageData: ImageData): boolean {
+  const { data, width, height } = imageData;
+  const size = 8;
+  let greenCount = 0;
+  let total = 0;
+
+  // Sample all 4 corners
+  const corners = [
+    [0, 0], [width - size, 0],
+    [0, height - size], [width - size, height - size],
+  ];
+  for (const [cx, cy] of corners) {
+    for (let y = cy; y < cy + size && y < height; y++) {
+      for (let x = cx; x < cx + size && x < width; x++) {
+        const idx = (y * width + x) * 4;
+        const r = data[idx], g = data[idx + 1], b = data[idx + 2];
+        // Green-ish: G is dominant, R and B are low
+        if (g > 150 && g > r + 50 && g > b + 50) greenCount++;
+        total++;
+      }
+    }
+  }
+
+  return total > 0 && greenCount / total > 0.5;
+}
+
+/**
+ * Remove solid green background with anti-aliased edges.
+ * Much more reliable than ML-based removal for AI-generated sprites.
+ */
+export function removeGreenScreen(imageData: ImageData): ImageData {
+  const { data, width, height } = imageData;
+  const out = new ImageData(new Uint8ClampedArray(data), width, height);
+  const d = out.data;
+  const tolerance = 50;
+
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i + 1], b = d[i + 2];
+    // "Greenness" = how much green dominates over red and blue
+    const greenness = g - Math.max(r, b);
+    if (greenness > 0) {
+      // Scale alpha: fully green → 0, transitional → gradient
+      const alpha = greenness > tolerance ? 0 : Math.round(255 * (1 - greenness / tolerance));
+      d[i + 3] = Math.min(d[i + 3], alpha);
+      // De-spill: reduce green tint on semi-transparent edge pixels
+      if (alpha > 0 && alpha < 255) {
+        d[i + 1] = Math.max(0, g - Math.round(greenness * 0.5));
+      }
+    }
+  }
+
+  return out;
+}
+
 // --- Checkerboard detection & removal ---
 
 interface CheckerResult {
@@ -197,7 +257,7 @@ export async function processFrames(
 ): Promise<HTMLImageElement[]> {
   const results: HTMLImageElement[] = [];
 
-  // Check first frame for checkerboard
+  // Detect background type from first frame
   const canvas = document.createElement("canvas");
   const firstFrame = frames[0];
   canvas.width = firstFrame.naturalWidth;
@@ -205,7 +265,11 @@ export async function processFrames(
   const ctx = canvas.getContext("2d")!;
   ctx.drawImage(firstFrame, 0, 0);
   const firstData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const checker = detectCheckerboard(firstData);
+
+  // Priority: green screen > checkerboard > RMBG-1.4
+  const isGreen = detectGreenScreen(firstData);
+  const checker = !isGreen ? detectCheckerboard(firstData) : { detected: false } as CheckerResult;
+  const method = isGreen ? "green" : checker.detected ? "checker" : "rmbg";
 
   for (let i = 0; i < frames.length; i++) {
     const frame = frames[i];
@@ -215,7 +279,17 @@ export async function processFrames(
     const fCtx = c.getContext("2d")!;
     fCtx.drawImage(frame, 0, 0);
 
-    if (checker.detected && checker.color1 && checker.color2) {
+    if (method === "green") {
+      const imgData = fCtx.getImageData(0, 0, c.width, c.height);
+      const processed = removeGreenScreen(imgData);
+      fCtx.putImageData(processed, 0, 0);
+      const img = new Image();
+      await new Promise<void>((resolve) => {
+        img.onload = () => resolve();
+        img.src = c.toDataURL("image/png");
+      });
+      results.push(img);
+    } else if (method === "checker" && checker.color1 && checker.color2) {
       const imgData = fCtx.getImageData(0, 0, c.width, c.height);
       const processed = removeCheckerboard(imgData, checker.color1, checker.color2);
       fCtx.putImageData(processed, 0, 0);

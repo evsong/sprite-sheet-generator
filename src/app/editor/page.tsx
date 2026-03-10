@@ -6,6 +6,7 @@ import { EditorCanvas } from "@/components/editor/EditorCanvas";
 import { SettingsPanel } from "@/components/editor/SettingsPanel";
 import { AnimationTimeline } from "@/components/editor/AnimationTimeline";
 import { AssetGrid } from "@/components/editor/AssetGrid";
+import { AnimationPreview } from "@/components/editor/AnimationPreview";
 import { AiGenerateModal } from "@/components/editor/AiGenerateModal";
 import { AiProgressToast } from "@/components/editor/AiProgressToast";
 import { useAutoPack } from "@/hooks/use-auto-pack";
@@ -80,7 +81,14 @@ export default function EditorPage() {
       >
         <EditorToolbar />
         <SpriteList />
-        <EditorCanvas />
+        {activeTab === "frames" ? (
+          <div className="flex" style={{ overflow: "hidden", minWidth: 0 }}>
+            <AnimationPreview />
+            <EditorCanvas />
+          </div>
+        ) : (
+          <EditorCanvas />
+        )}
         <SettingsPanel />
         {activeTab === "frames" ? <AnimationTimeline /> : <AssetGrid />}
       </div>

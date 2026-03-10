@@ -47,7 +47,7 @@ export function buildSystemPrompt(
     `Create a sprite sheet with exactly ${frameCount} ${mode === "sequence" ? "animation frames" : "items"} arranged in a ${rows}×${cols} grid (${rows} rows, ${cols} columns).`,
     `Each cell must be exactly the same size.`,
     `${style} style, suitable for game engine import.`,
-    `Use a solid checkerboard gray-white background behind each ${mode === "sequence" ? "frame" : "item"}.`,
+    `Use a SOLID BRIGHT GREEN (#00FF00) background behind each ${mode === "sequence" ? "frame" : "item"}. The background MUST be a single uniform green color with NO patterns, gradients, or checkerboards.`,
     `DO NOT add labels, numbers, borders, or any text between cells.`,
   ];
 
